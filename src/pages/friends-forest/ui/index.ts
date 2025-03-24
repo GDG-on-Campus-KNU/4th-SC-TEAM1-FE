@@ -1,0 +1,1 @@
+export { FriendsForestPage } from './FriendsForestPage';
