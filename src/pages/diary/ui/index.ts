@@ -1,0 +1,1 @@
+export { DiaryPage } from './DiaryPage';
