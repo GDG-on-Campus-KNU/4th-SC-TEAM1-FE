@@ -44,7 +44,7 @@ export default tseslint.config(
       ],
       'jsx-a11y/alt-text': 'warn',
       'prettier/prettier': 'warn',
-      'react/react-in-jsx-scope': 'off', // React 17+ 필수 아님
+      'react/react-in-jsx-scope': 'off',
     },
     settings: {
       react: {
