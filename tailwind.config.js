@@ -7,9 +7,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#7FB77E',   // 예시: 감정 컬러
-        secondary: '#FFE382', // 포인트 컬러
+        // 브랜드 컬러
+        primary: '#7FB77E',
+        secondary: '#FFE382',
         softGray: '#f3f4f6',
+
+        // 일기 감정 기록용
+        happy: '#FFCE56',
+        sad: '#6C63FF',
+        calm: '#A0D8EF',
+        angry: '#FF6B6B',
       },
       fontFamily: {
         sans: ['"Noto Sans KR"', 'sans-serif'],
@@ -27,6 +34,13 @@ export default {
       animation: {
         'slide-in': 'slide-in 0.3s ease-out',
         'fade-in': 'fade-in 0.5s ease-in',
+        'bounce-slow': 'bounce 1.5s infinite',
+      },
+      boxShadow: {
+        card: '0 2px 12px rgba(0, 0, 0, 0.08)',
+      },
+      screens: {
+        sm: '360px',
       },
     },
   },
