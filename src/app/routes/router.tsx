@@ -1,17 +1,19 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 import { DiaryPage } from '@pages/diary';
 import { ErrorPage } from '@pages/error';
 import { FriendsForestPage } from '@pages/friends-forest';
 import { MindTreePage } from '@pages/mind-tree';
 import { Mypage } from '@pages/mypage';
-
+import { Layout } from '@shared/components';
 import { RouterPath } from '@shared/constants';
+
+// Layout import
 
 const router = createBrowserRouter([
   {
     path: RouterPath.ROOT,
-    //   element: <Layout />,
+    element: <Layout />, // ✅ 모든 페이지 공통 레이아웃
     children: [
       {
         path: RouterPath.MAIN,
@@ -29,11 +31,11 @@ const router = createBrowserRouter([
         path: RouterPath.MYPAGE,
         element: <Mypage />,
       },
-      {
-        path: RouterPath.ERROR,
-        element: <ErrorPage />,
-      },
     ],
+  },
+  {
+    path: RouterPath.ERROR,
+    element: <ErrorPage />, // ❗ Layout 없이 단독 페이지
   },
 ]);
 
