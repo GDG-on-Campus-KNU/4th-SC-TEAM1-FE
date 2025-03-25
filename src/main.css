@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =============================
-   🧘‍♀️ 토닥 서비스 공통 스타일
-   ============================= */
 body {
-  @apply font-sans bg-softGray text-gray-800;
+  @apply bg-softGray font-sans text-gray-800;
 }
