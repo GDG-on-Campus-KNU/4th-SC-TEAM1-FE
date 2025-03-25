@@ -63,4 +63,20 @@ export const globalStyles = css`
   #__next {
     isolation: isolate;
   }
+
+  /* 스크롤바 커스터마이징 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1; /* Tailwind slate-300 */
+    border-radius: 9999px;
+    border: 2px solid #f9fafb; /* 배경색과 여백처럼 보이게 */
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
