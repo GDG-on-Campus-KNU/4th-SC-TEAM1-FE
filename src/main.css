@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================
+   🧘‍♀️ 토닥 서비스 글로벌 스타일
+   ============================= */
+
 body {
   @apply bg-softGray font-sans text-gray-800;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+a {
+  @apply text-inherit no-underline;
+}
+
+button {
+  @apply cursor-pointer border-0 bg-transparent font-sans;
+}
+
+input,
+textarea {
+  @apply border-0 bg-transparent font-sans text-inherit outline-none;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid #f9fafb;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
 }
