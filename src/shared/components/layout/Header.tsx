@@ -6,7 +6,7 @@ import { Bell, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide
 import Logo from '../../assets/todak.svg';
 
 // 임시 로그인 상태 (백엔드 연동 전)
-const isLoggedIn = true;
+const isLoggedIn = false;
 const userName = '이지호';
 
 export const Header = () => {
