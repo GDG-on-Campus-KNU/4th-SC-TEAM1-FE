@@ -3,14 +3,12 @@ import { useState } from 'react';
 import { Eye, EyeOff, X } from 'lucide-react';
 
 type LoginModalProps = {
-  isOpen: boolean;
   onClose: () => void;
+  onSwitch: () => void;
 };
 
-export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
+export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
@@ -59,7 +57,10 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
         {/* 회원가입 링크 */}
         <p className="mt-4 text-center text-sm text-gray-500 sm:text-xs">
-          아직 계정이 없으신가요? <button className="text-primary hover:underline">회원가입</button>
+          아직 계정이 없으신가요?{' '}
+          <button className="text-primary hover:underline" onClick={onSwitch}>
+            회원가입
+          </button>
         </p>
       </div>
     </div>

@@ -3,15 +3,13 @@ import { useState } from 'react';
 import { Eye, EyeOff, X } from 'lucide-react';
 
 type RegisterModalProps = {
-  isOpen: boolean;
   onClose: () => void;
+  onSwitch: () => void;
 };
 
-export const RegisterModal = ({ isOpen, onClose }: RegisterModalProps) => {
+export const RegisterModal = ({ onClose, onSwitch }: RegisterModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
@@ -30,21 +28,18 @@ export const RegisterModal = ({ isOpen, onClose }: RegisterModalProps) => {
           회원가입
         </h2>
 
-        {/* 닉네임 입력 */}
         <input
           type="text"
           placeholder="닉네임 (중복 확인)"
           className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none sm:text-xs md:text-sm"
         />
 
-        {/* 아이디 입력 */}
         <input
           type="text"
           placeholder="아이디 (중복 확인)"
           className="mb-4 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none sm:text-xs md:text-sm"
         />
 
-        {/* 비밀번호 입력 */}
         <div className="relative mb-4">
           <input
             type={showPassword ? 'text' : 'password'}
@@ -60,7 +55,6 @@ export const RegisterModal = ({ isOpen, onClose }: RegisterModalProps) => {
           </button>
         </div>
 
-        {/* 비밀번호 확인 */}
         <div className="relative mb-6">
           <input
             type={showConfirmPassword ? 'text' : 'password'}
@@ -76,10 +70,16 @@ export const RegisterModal = ({ isOpen, onClose }: RegisterModalProps) => {
           </button>
         </div>
 
-        {/* 회원가입 버튼 */}
         <button className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 sm:text-xs md:text-sm">
           회원가입
         </button>
+
+        <p className="mt-4 text-center text-sm text-gray-500 sm:text-xs">
+          이미 계정이 있으신가요?{' '}
+          <button className="text-primary hover:underline" onClick={onSwitch}>
+            로그인
+          </button>
+        </p>
       </div>
     </div>
   );
