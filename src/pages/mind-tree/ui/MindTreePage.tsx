@@ -1,3 +1,8 @@
+import { LoggedIn } from './LoggedIn';
+import { LoggedOut } from './LoggedOut';
+
+const isLoggedIn = false;
+
 export const MindTreePage = () => {
-  return <div>🌳 Mind Tree 페이지 (임시)</div>;
+  return isLoggedIn ? <LoggedIn /> : <LoggedOut />;
 };
