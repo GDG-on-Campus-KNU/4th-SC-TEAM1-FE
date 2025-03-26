@@ -10,7 +10,7 @@ export const Layout = () => {
   return (
     <div className="flex min-h-screen flex-col bg-softGray">
       <Header onLoginClick={() => setModal('login')} />
-      <main className="flex-1 px-4 py-6">
+      <main className="flex-1">
         <Outlet />
       </main>
       <AuthModal modal={modal} setModal={setModal} />
