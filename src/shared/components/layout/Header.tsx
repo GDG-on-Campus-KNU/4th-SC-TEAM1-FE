@@ -12,7 +12,7 @@ type HeaderProps = {
 export const Header = ({ onLoginClick }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const isLoggedIn = false;
+  const isLoggedIn = true;
   const userName = '이지호';
 
   const isActive = (path: string) => location.pathname === path;
