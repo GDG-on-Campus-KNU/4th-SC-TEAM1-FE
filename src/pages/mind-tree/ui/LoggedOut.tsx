@@ -1,3 +1,5 @@
+import HelloTodak from '../assets/hello-todak.png';
+
 type LoggedOutProps = {
   setModal: (modal: 'login' | 'register') => void;
 };
@@ -5,7 +7,12 @@ type LoggedOutProps = {
 export const LoggedOut = ({ setModal }: LoggedOutProps) => {
   return (
     <div className="flex min-h-screen w-full animate-fade-in flex-col items-center justify-center bg-gradient-to-b from-[#fdfcfb] to-[#e2ebe5] px-4 py-12 text-center">
-      <h1 className="animate-fade-in-up mb-4 text-2xl font-bold leading-snug text-gray-800 md:text-3xl">
+      <img
+        src={HelloTodak}
+        alt="토닥이가 인사해요"
+        className="animate-fade-in-up mb-6 w-32 sm:w-40 md:w-48 lg:w-56"
+      />
+      <h1 className="animate-fade-in-up fontșbold mb-4 text-2xl leading-snug text-gray-800 md:text-3xl">
         감정 일기로 나를 돌보는 공간
         <br />
         <span className="text-primary">토닥</span>
@@ -54,8 +61,8 @@ export const LoggedOut = ({ setModal }: LoggedOutProps) => {
         <div className="flex-1 rounded-xl bg-white p-6 text-center shadow-md">
           <h3 className="mb-2 text-lg font-semibold text-primary">마음나무</h3>
           <p className="text-balance break-keep text-sm text-gray-600">
-            감정을 기록할수록 성장하는 당신만의 나무를 키워보세요. 씨앗부터 성목까지 다양한 단계로
-            자라나요.
+            토닥 서비스를 이용하고 포인트를 모아 당신만의 나무를 키워보세요. 씨앗부터 성목까지
+            다양한 단계로 자라나요.
           </p>
         </div>
 
