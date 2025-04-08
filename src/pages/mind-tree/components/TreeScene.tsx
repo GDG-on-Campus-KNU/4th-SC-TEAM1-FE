@@ -20,17 +20,13 @@ type TreeSceneProps = {
 
 export const TreeScene = ({ stage, onGuestbookClick }: TreeSceneProps) => {
   return (
-    <div className="relative min-h-[calc(100vh-65px)] w-full overflow-hidden">
-      {/* 나무 + 방명록 아이콘을 하나의 박스로 묶고 하단 40% 위치에 정렬 */}
+    <div className="relative min-h-full w-full overflow-hidden">
       <div className="absolute left-1/2 -translate-x-1/2 sm:bottom-[22%] md:bottom-[17%]">
-        {/* 나무 이미지 */}
         <img
           src={treeImages[stage]}
           alt={`나무 단계: ${stage}`}
           className="z-10 w-48 sm:w-60 md:w-72"
         />
-
-        {/* 방명록 아이콘 */}
         <button
           onClick={onGuestbookClick}
           className="animate-float absolute -right-4 -top-0 focus:outline-none"
