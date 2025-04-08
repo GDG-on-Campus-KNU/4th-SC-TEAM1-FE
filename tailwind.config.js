@@ -30,11 +30,15 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
       },
       animation: {
         'slide-in': 'slide-in 0.3s ease-out',
         'fade-in': 'fade-in 0.5s ease-in',
-        'bounce-slow': 'bounce 1.5s infinite',
+        'float': 'float 2.5s ease-in-out infinite',
       },
       boxShadow: {
         card: '0 2px 12px rgba(0, 0, 0, 0.08)',
