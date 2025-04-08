@@ -57,7 +57,7 @@ export const GuestbookModal = ({ isOpen, onClose }: GuestbookModalProps) => {
         <h2 className="mb-4 text-center text-xl font-bold text-primary md:text-2xl">방명록</h2>
 
         {/* 댓글 리스트 */}
-        <div className="max-h-[300px] space-y-4 overflow-y-auto pr-1">
+        <div className="scrollbar-thin scrollbar-thumb-transparent scrollbar-track-transparent max-h-[300px] space-y-4 overflow-y-auto pr-[2px]">
           {dummyComments.map((item) => (
             <div
               key={item.id}
@@ -74,7 +74,7 @@ export const GuestbookModal = ({ isOpen, onClose }: GuestbookModalProps) => {
                 <X className="h-4 w-4" />
               </button>
 
-              {/* 작성자 + 날짜 (한 줄) */}
+              {/* 작성자 + 날짜 */}
               <div className="mb-1 flex items-center gap-2 text-xs text-gray-500 sm:text-sm">
                 <span className="font-semibold text-gray-700">{item.name}</span>
                 <span className="text-gray-400">{item.date}</span>
