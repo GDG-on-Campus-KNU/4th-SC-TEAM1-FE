@@ -13,7 +13,7 @@ import { RouterPath } from '@shared/constants';
 const router = createBrowserRouter([
   {
     path: RouterPath.ROOT,
-    element: <Layout />, // ✅ 모든 페이지 공통 레이아웃
+    element: <Layout />,
     children: [
       {
         path: RouterPath.MAIN,

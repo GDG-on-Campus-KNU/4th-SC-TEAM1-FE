@@ -1,14 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
+import { initGA } from '@shared/utils';
+
+import { AnalyticsTracker } from '../analytics';
 import { AuthModal } from '../auth';
 import { Header } from './Header';
 
 export const Layout = () => {
   const [modal, setModal] = useState<'login' | 'register' | null>(null);
 
+  useEffect(() => {
+    initGA();
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-softGray">
+      <AnalyticsTracker />
       <Header onLoginClick={() => setModal('login')} />
       <main className="flex-1">
         <Outlet />
