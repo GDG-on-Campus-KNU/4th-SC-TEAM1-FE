@@ -24,7 +24,7 @@ export const LoggedIn = () => {
 
   return (
     <div
-      className="flex w-full flex-col bg-cover bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-65px)]"
+      className="flex w-full flex-col bg-cover bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
       style={{
         backgroundImage: `url(${Background})`,
         backgroundPosition: 'bottom center',
