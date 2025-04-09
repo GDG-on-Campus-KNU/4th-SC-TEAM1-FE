@@ -18,7 +18,7 @@ export const Mypage = () => {
 
   return (
     <div
-      className="flex w-full items-center justify-center bg-cover bg-no-repeat px-4 py-8"
+      className="flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat px-4 py-8"
       style={{
         backgroundImage: `url(${Background})`,
         backgroundPosition: 'bottom center',

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
 
-import Logo from '../../assets/todak.svg';
+import Logo from '../../assets/todak.png';
 
 type HeaderProps = {
   onLoginClick: () => void;
@@ -23,7 +23,7 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
       <div className="flex items-center justify-between px-2 md:px-6 lg:px-12">
         {/* 로고 */}
         <Link to="/" className="flex items-center gap-2">
-          <img src={Logo} alt="토닥 로고" className="h-7 w-auto md:h-10" />
+          <img src={Logo} alt="토닥 로고" className="h-6 w-auto md:h-8" />
         </Link>
 
         {/* 데스크탑 메뉴 */}
