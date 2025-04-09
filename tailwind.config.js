@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-import scrollbar from 'tailwind-scrollbar';
 
 export default {
   content: [
@@ -50,5 +49,5 @@ export default {
       },
     },
   },
-  plugins: [scrollbar,],
+  plugins: [],
 };
