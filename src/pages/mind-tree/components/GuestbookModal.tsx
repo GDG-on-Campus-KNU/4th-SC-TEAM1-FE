@@ -57,7 +57,7 @@ export const GuestbookModal = ({ isOpen, onClose }: GuestbookModalProps) => {
         <h2 className="mb-4 text-center text-xl font-bold text-primary md:text-2xl">방명록</h2>
 
         {/* 댓글 리스트 */}
-        <div className="scrollbar-thin scrollbar-thumb-transparent scrollbar-track-transparent max-h-[300px] space-y-4 overflow-y-auto pr-[2px]">
+        <div className="max-h-[300px] space-y-4 overflow-y-auto pr-[2px]">
           {dummyComments.map((item) => (
             <div
               key={item.id}
