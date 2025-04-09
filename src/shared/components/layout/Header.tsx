@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { Bell, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
+import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
 
 import Logo from '../../assets/todak.svg';
 
@@ -14,6 +14,7 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
   const location = useLocation();
   const isLoggedIn = true;
   const userName = '이지호';
+  const userPoint = 1200;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -29,6 +30,10 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
         <nav className="hidden items-center gap-6 md:flex">
           {isLoggedIn ? (
             <>
+              <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-3 py-1 text-sm font-extrabold text-gray-600">
+                <Gem className="h-4 w-4 text-yellow-500" />
+                {userPoint} P
+              </div>
               <Link
                 to="/"
                 className={`font-medium hover:text-primary ${
@@ -75,7 +80,15 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
         </nav>
 
         {/* 모바일 메뉴 버튼 */}
-        <div className="md:hidden">
+        <div className="flex items-center gap-3 md:hidden">
+          {/* 💎 모바일 포인트 */}
+          {isLoggedIn && (
+            <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-2 py-1 text-sm font-extrabold text-gray-600">
+              <Gem className="h-4 w-4 text-yellow-500" />
+              {userPoint} P
+            </div>
+          )}
+
           {isLoggedIn ? (
             <button onClick={() => setMenuOpen(!menuOpen)} aria-label="메뉴 열기">
               <Menu className="h-6 w-6 text-gray-700" />
