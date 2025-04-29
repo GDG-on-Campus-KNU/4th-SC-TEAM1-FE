@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 import { getRefreshToken, setAccessToken, setRefreshToken } from '../utils';
-// ✅ axios 직접 import
 import { axiosInstance } from './axiosInstance';
 
 export type SignupRequest = {
@@ -121,5 +120,20 @@ export const checkUserId = async (userId: string): Promise<boolean> => {
     return response.data.data.exists;
   } catch {
     throw new Error('아이디 중복 확인 중 오류가 발생했습니다.');
+  }
+};
+
+// 로그인 요청
+export const login = async ({ userId, password }: { userId: string; password: string }) => {
+  try {
+    const response = await axiosInstance.post('/members/login', { userId, password });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const message = error.response.data?.message || '로그인에 실패했습니다.';
+      throw new Error(message);
+    } else {
+      throw new Error('네트워크 오류가 발생했습니다.');
+    }
   }
 };
