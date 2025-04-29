@@ -7,7 +7,7 @@ import { LoggedOut } from './LoggedOut';
 
 export const MindTreePage = () => {
   const [modal, setModal] = useState<'login' | 'register' | null>(null);
-  const isLoggedIn = true;
+  const isLoggedIn = false;
 
   return (
     <>
