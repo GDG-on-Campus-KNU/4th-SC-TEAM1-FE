@@ -36,6 +36,18 @@ export const logout = async (): Promise<void> => {
   }
 };
 
+export const deleteAccount = async (): Promise<void> => {
+  try {
+    await axiosInstance.delete('/members/me');
+    accessToken.remove();
+    refreshTokenUtil.remove();
+    useAuthStore.getState().logout();
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
 export const checkUserId = async (userId: string): Promise<boolean> => {
   try {
     const response = await axiosInstance.post('/members/check-userId', { userId });
