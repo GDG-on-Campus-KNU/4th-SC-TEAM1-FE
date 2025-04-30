@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
+import { useAuthStore } from '@shared/stores/authStore';
 import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
 
 import Logo from '../../assets/todak.png';
@@ -12,9 +13,10 @@ type HeaderProps = {
 export const Header = ({ onLoginClick }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const isLoggedIn = false;
-  const userName = '이지호';
-  const userPoint = 1200;
+
+  // ✅ 로그인 상태 zustand에서 가져오기
+  const { isLoggedIn, nickname } = useAuthStore();
+  const userPoint = 1200; // 예시: 추후 point 상태 추가 가능
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -30,10 +32,13 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
         <nav className="hidden items-center gap-6 md:flex">
           {isLoggedIn ? (
             <>
+              {/* 포인트 표시 */}
               <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-3 py-1 text-sm font-extrabold text-gray-600">
                 <Gem className="h-4 w-4 text-yellow-500" />
                 {userPoint} P
               </div>
+
+              {/* 메뉴 */}
               <Link
                 to="/"
                 className={`font-medium hover:text-primary ${
@@ -58,15 +63,19 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
               >
                 이웃숲
               </Link>
+
+              {/* 알림 버튼 */}
               <button className="relative" aria-label="알림">
                 <Bell className="h-5 w-5 text-gray-600 hover:text-primary" />
               </button>
+
+              {/* 마이페이지 */}
               <Link
                 to="/mypage"
                 className="flex items-center gap-1 rounded-full bg-primary/40 px-4 py-1.5 text-xs font-medium text-black/60 transition-colors hover:bg-primary/60"
               >
                 <UserRound className="h-4 w-4" />
-                {userName}
+                {nickname}
               </Link>
             </>
           ) : (
@@ -81,7 +90,6 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
 
         {/* 모바일 메뉴 버튼 */}
         <div className="flex items-center gap-3 md:hidden">
-          {/* 💎 모바일 포인트 */}
           {isLoggedIn && (
             <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-2 py-1 text-sm font-extrabold text-gray-600">
               <Gem className="h-4 w-4 text-yellow-500" />
@@ -107,11 +115,16 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
       {/* 모바일 드롭다운 메뉴 */}
       {menuOpen && isLoggedIn && (
         <div className="mt-2 space-y-2 divide-y divide-gray-200 border-t bg-white px-4 py-2 md:hidden">
-          <button className="flex items-center gap-2 py-2 text-sm" aria-label="알림">
+          <button
+            className="flex items-center gap-2 py-2 text-sm"
+            aria-label="알림"
+            onClick={() => setMenuOpen(false)}
+          >
             <Bell className="h-4 w-4 text-gray-600" /> 알림
           </button>
           <Link
             to="/"
+            onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-2 py-2 text-sm ${
               isActive('/') ? 'font-semibold text-primary' : 'text-gray-600'
             }`}
@@ -120,6 +133,7 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
           </Link>
           <Link
             to="/diary"
+            onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-2 py-2 text-sm ${
               isActive('/diary') ? 'font-semibold text-primary' : 'text-gray-600'
             }`}
@@ -128,6 +142,7 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
           </Link>
           <Link
             to="/forests"
+            onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-2 py-2 text-sm ${
               isActive('/forests') ? 'font-semibold text-primary' : 'text-gray-600'
             }`}
@@ -136,11 +151,12 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
           </Link>
           <Link
             to="/mypage"
+            onClick={() => setMenuOpen(false)}
             className={`flex items-center gap-2 py-2 text-sm ${
               isActive('/mypage') ? 'font-semibold text-primary' : 'text-gray-600'
             }`}
           >
-            <UserRound className="h-4 w-4" /> {userName}
+            <UserRound className="h-4 w-4" /> {nickname}
           </Link>
         </div>
       )}
