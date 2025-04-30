@@ -1,5 +1,8 @@
 import { useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
+import { logout as logoutAPI } from '@shared/apis';
 import { LogOut, Trash2, Upload } from 'lucide-react';
 
 import Background from '../assets/mypage-background.png';
@@ -8,11 +11,26 @@ export const Mypage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [nickname, setNickname] = useState('이지호');
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const navigate = useNavigate();
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setProfilePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logoutAPI();
+      toast.success('로그아웃 되었습니다.');
+      navigate('/');
+    } catch {
+      toast.error('로그아웃 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -38,6 +56,7 @@ export const Mypage = () => {
             <button
               className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-primary p-1.5 text-white hover:bg-primary/90"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isLoggingOut}
             >
               <Upload className="h-4 w-4" />
             </button>
@@ -60,9 +79,13 @@ export const Mypage = () => {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+              disabled={isLoggingOut}
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
             />
-            <button className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90">
+            <button
+              disabled={isLoggingOut}
+              className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               저장
             </button>
           </div>
@@ -74,30 +97,49 @@ export const Mypage = () => {
           <input
             type="password"
             placeholder="현재 비밀번호"
-            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+            disabled={isLoggingOut}
+            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
           />
           <input
             type="password"
             placeholder="새 비밀번호"
-            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+            disabled={isLoggingOut}
+            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
           />
           <input
             type="password"
             placeholder="새 비밀번호 확인"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+            disabled={isLoggingOut}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
           />
-          <button className="mt-2 w-full rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90">
+          <button
+            disabled={isLoggingOut}
+            className="mt-2 w-full rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             비밀번호 변경
           </button>
         </div>
 
         {/* 로그아웃 & 탈퇴 */}
         <div className="mt-4 flex flex-col gap-3">
-          <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100">
-            <LogOut className="h-4 w-4" />
-            로그아웃
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoggingOut ? (
+              <span>로그아웃 중입니다...</span>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4" />
+                로그아웃
+              </>
+            )}
           </button>
-          <button className="flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50">
+          <button
+            disabled={isLoggingOut}
+            className="flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             <Trash2 className="h-4 w-4" />
             회원 탈퇴
           </button>
