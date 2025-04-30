@@ -5,7 +5,7 @@ import { Routes } from '@app/routes';
 const App = () => {
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="bottom-right" reverseOrder={false} />
       <Routes />
     </>
   );

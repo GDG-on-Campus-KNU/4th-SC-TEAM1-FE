@@ -8,6 +8,8 @@ import { Mypage } from '@pages/mypage';
 import { Layout } from '@shared/components';
 import { RouterPath } from '@shared/constants';
 
+import { PrivateRoute } from './PrivateRoute';
+
 // Layout import
 
 const router = createBrowserRouter([
@@ -21,15 +23,27 @@ const router = createBrowserRouter([
       },
       {
         path: RouterPath.DIARY,
-        element: <DiaryPage />,
+        element: (
+          <PrivateRoute>
+            <DiaryPage />
+          </PrivateRoute>
+        ),
       },
       {
         path: RouterPath.FORESTS,
-        element: <FriendsForestPage />,
+        element: (
+          <PrivateRoute>
+            <FriendsForestPage />
+          </PrivateRoute>
+        ),
       },
       {
         path: RouterPath.MYPAGE,
-        element: <Mypage />,
+        element: (
+          <PrivateRoute>
+            <Mypage />
+          </PrivateRoute>
+        ),
       },
     ],
   },
