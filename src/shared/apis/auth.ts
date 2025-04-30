@@ -19,6 +19,23 @@ export type SuccessResponse = {
   };
 };
 
+export type LoginRequest = {
+  userId: string;
+  password: string;
+};
+
+export type LoginResponse = {
+  code: number;
+  status: string;
+  message: string;
+  data: {
+    userId: string;
+    nickname: string;
+    accessToken: string;
+    refreshToken: string;
+  };
+};
+
 export type StackTraceItem = {
   classLoaderName: string;
   moduleName: string;
@@ -124,16 +141,7 @@ export const checkUserId = async (userId: string): Promise<boolean> => {
 };
 
 // 로그인 요청
-export const login = async ({ userId, password }: { userId: string; password: string }) => {
-  try {
-    const response = await axiosInstance.post('/members/login', { userId, password });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const message = error.response.data?.message || '로그인에 실패했습니다.';
-      throw new Error(message);
-    } else {
-      throw new Error('네트워크 오류가 발생했습니다.');
-    }
-  }
+export const login = async (payload: LoginRequest): Promise<LoginResponse> => {
+  const response = await axiosInstance.post<LoginResponse>('/members/login', payload);
+  return response.data;
 };

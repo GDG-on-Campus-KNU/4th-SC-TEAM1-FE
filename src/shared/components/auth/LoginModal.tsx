@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { login } from '@shared/apis';
+import { useAuthStore } from '@shared/stores/authStore';
 import { setAccessToken, setRefreshToken } from '@shared/utils';
 import { Eye, EyeOff, X } from 'lucide-react';
 
@@ -24,18 +26,26 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
   } = useForm<LoginFormInputs>({ mode: 'onChange' });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // ✅ 로딩 상태 추가
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const navigate = useNavigate();
+
+  const { login: loginToStore } = useAuthStore();
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      setIsLoading(true); // ✅ 요청 전
+      setIsLoggingIn(true);
+
       const response = await login(data);
+      const { userId, nickname, accessToken, refreshToken } = response.data;
 
-      setAccessToken(response.data.accessToken);
-      setRefreshToken(response.data.refreshToken);
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
 
-      toast.success('로그인에 성공했습니다!');
+      loginToStore(userId, nickname);
+
+      toast.success(`${nickname}님 환영합니다!`);
       onClose();
+      navigate('/');
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message || '로그인에 실패했습니다.');
@@ -43,13 +53,14 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
         toast.error('로그인 중 오류가 발생했습니다.');
       }
     } finally {
-      setIsLoading(false); // ✅ 요청 완료 후
+      setIsLoggingIn(false);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
       <div className="relative w-full max-w-sm animate-fade-in rounded-2xl bg-white p-6 shadow-xl sm:max-w-xs">
+        {/* 닫기 버튼 */}
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
@@ -58,10 +69,11 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
           <X className="h-5 w-5" />
         </button>
 
+        {/* 제목 */}
         <h2 className="mb-6 text-center text-xl font-bold text-gray-800">로그인</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {/* 아이디 */}
+          {/* 아이디 입력 */}
           <div>
             <input
               type="text"
@@ -72,7 +84,7 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
             {errors.userId && <p className="mt-1 text-xs text-red-500">{errors.userId.message}</p>}
           </div>
 
-          {/* 비밀번호 */}
+          {/* 비밀번호 입력 */}
           <div>
             <div className="relative">
               <input
@@ -97,13 +109,14 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
           {/* 로그인 버튼 */}
           <button
             type="submit"
-            disabled={isLoading} // ✅ 비활성화 처리
-            className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={isLoggingIn}
+            className="w-full rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-gray-400"
           >
-            {isLoading ? '잠시만 기다려주세요...' : '로그인'} {/* ✅ 문구 변경 */}
+            {isLoggingIn ? '잠시만 기다려주세요...' : '로그인'}
           </button>
         </form>
 
+        {/* 회원가입 안내 */}
         <p className="mt-4 text-center text-sm text-gray-500">
           아직 계정이 없으신가요?{' '}
           <button className="text-primary hover:underline" onClick={onSwitch}>
