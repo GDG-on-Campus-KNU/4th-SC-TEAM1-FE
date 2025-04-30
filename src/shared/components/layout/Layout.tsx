@@ -5,7 +5,9 @@ import { initGA } from '@shared/utils';
 
 import { AnalyticsTracker } from '../analytics';
 import { AuthModal } from '../auth';
+import { AppInit } from './AppInit';
 import { Header } from './Header';
+import { ScrollToTop } from './ScrollToTop';
 
 export const Layout = () => {
   const [modal, setModal] = useState<'login' | 'register' | null>(null);
@@ -16,6 +18,8 @@ export const Layout = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-softGray">
+      <ScrollToTop />
+      <AppInit />
       <AnalyticsTracker />
       <Header onLoginClick={() => setModal('login')} />
       <main className="flex-1">

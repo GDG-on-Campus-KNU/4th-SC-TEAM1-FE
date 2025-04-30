@@ -1,13 +1,23 @@
 import { useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
+import { deleteAccount, logout as logoutAPI } from '@shared/apis';
+import { useAuthStore } from '@shared/stores/authStore';
 import { LogOut, Trash2, Upload } from 'lucide-react';
 
 import Background from '../assets/mypage-background.png';
 
 export const Mypage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [nickname, setNickname] = useState('이지호');
+  const { user } = useAuthStore();
+  const nickname = user?.nickname ?? '';
+
+  const [nicknameInput, setNicknameInput] = useState(nickname);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -15,6 +25,36 @@ export const Mypage = () => {
       setProfilePreview(URL.createObjectURL(file));
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logoutAPI();
+      toast.success('로그아웃 되었습니다.');
+      navigate('/');
+    } catch {
+      toast.error('로그아웃 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('정말 탈퇴하시겠어요? 이 작업은 되돌릴 수 없습니다.')) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteAccount();
+      toast.success('회원 탈퇴가 완료되었습니다.');
+      navigate('/');
+    } catch {
+      toast.error('회원 탈퇴 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isBusy = isLoggingOut || isDeleting;
 
   return (
     <div
@@ -31,13 +71,17 @@ export const Mypage = () => {
         <div className="mb-6 flex flex-col items-center gap-2">
           <div className="relative">
             <img
-              src={profilePreview ?? 'https://api.dicebear.com/7.x/initials/svg?seed=지호'}
+              src={
+                profilePreview ??
+                `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nickname)}`
+              }
               alt="프로필 이미지"
               className="h-24 w-24 rounded-full border border-gray-300 object-cover"
             />
             <button
               className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-primary p-1.5 text-white hover:bg-primary/90"
               onClick={() => fileInputRef.current?.click()}
+              disabled={isBusy}
             >
               <Upload className="h-4 w-4" />
             </button>
@@ -58,11 +102,15 @@ export const Mypage = () => {
           <div className="flex gap-2">
             <input
               type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+              value={nicknameInput}
+              onChange={(e) => setNicknameInput(e.target.value)}
+              disabled={isBusy}
+              className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
             />
-            <button className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90">
+            <button
+              disabled={isBusy}
+              className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               저장
             </button>
           </div>
@@ -74,32 +122,58 @@ export const Mypage = () => {
           <input
             type="password"
             placeholder="현재 비밀번호"
-            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+            disabled={isBusy}
+            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
           />
           <input
             type="password"
             placeholder="새 비밀번호"
-            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+            disabled={isBusy}
+            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
           />
           <input
             type="password"
             placeholder="새 비밀번호 확인"
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none"
+            disabled={isBusy}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
           />
-          <button className="mt-2 w-full rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90">
+          <button
+            disabled={isBusy}
+            className="mt-2 w-full rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             비밀번호 변경
           </button>
         </div>
 
         {/* 로그아웃 & 탈퇴 */}
         <div className="mt-4 flex flex-col gap-3">
-          <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100">
-            <LogOut className="h-4 w-4" />
-            로그아웃
+          <button
+            onClick={handleLogout}
+            disabled={isBusy}
+            className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLoggingOut ? (
+              <span>로그아웃 중입니다...</span>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4" />
+                로그아웃
+              </>
+            )}
           </button>
-          <button className="flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50">
-            <Trash2 className="h-4 w-4" />
-            회원 탈퇴
+          <button
+            onClick={handleDeleteAccount}
+            disabled={isBusy}
+            className="flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isDeleting ? (
+              <span>탈퇴 처리 중입니다...</span>
+            ) : (
+              <>
+                <Trash2 className="h-4 w-4" />
+                회원 탈퇴
+              </>
+            )}
           </button>
         </div>
       </div>
