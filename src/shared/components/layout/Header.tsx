@@ -2,16 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useAuthStore } from '@shared/stores/authStore';
-import {
-  Bell,
-  Gem,
-  LogOut,
-  Menu,
-  NotebookPen,
-  TreeDeciduous,
-  Trees,
-  UserRound,
-} from 'lucide-react';
+import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
 
 import Logo from '../../assets/todak.png';
 
@@ -23,16 +14,10 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
-  const { isLoggedIn, user, logout } = useAuthStore();
+  const { isLoggedIn, user } = useAuthStore();
   const userPoint = 1200;
 
   const isActive = (path: string) => location.pathname === path;
-
-  const handleLogout = () => {
-    logout();
-    setMenuOpen(false);
-    window.location.href = '/';
-  };
 
   return (
     <header className="w-full border-b bg-white px-4 py-3 shadow-sm">
@@ -139,12 +124,6 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
           >
             <UserRound className="h-4 w-4" /> {user?.nickname ?? '마이페이지'}
           </Link>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 py-2 text-sm text-red-500"
-          >
-            <LogOut className="h-4 w-4" /> 로그아웃
-          </button>
         </div>
       )}
     </header>

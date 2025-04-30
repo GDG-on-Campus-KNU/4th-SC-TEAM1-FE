@@ -3,13 +3,17 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { logout as logoutAPI } from '@shared/apis';
+import { useAuthStore } from '@shared/stores/authStore';
 import { LogOut, Trash2, Upload } from 'lucide-react';
 
 import Background from '../assets/mypage-background.png';
 
 export const Mypage = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [nickname, setNickname] = useState('이지호');
+  const { user } = useAuthStore(); // ✅ 상태에서 user 가져오기
+  const nickname = user?.nickname ?? ''; // ✅ null-safe 닉네임 추출
+
+  const [nicknameInput, setNicknameInput] = useState(nickname);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
@@ -49,7 +53,10 @@ export const Mypage = () => {
         <div className="mb-6 flex flex-col items-center gap-2">
           <div className="relative">
             <img
-              src={profilePreview ?? 'https://api.dicebear.com/7.x/initials/svg?seed=지호'}
+              src={
+                profilePreview ??
+                `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nickname)}`
+              }
               alt="프로필 이미지"
               className="h-24 w-24 rounded-full border border-gray-300 object-cover"
             />
@@ -77,8 +84,8 @@ export const Mypage = () => {
           <div className="flex gap-2">
             <input
               type="text"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              value={nicknameInput}
+              onChange={(e) => setNicknameInput(e.target.value)}
               disabled={isLoggingOut}
               className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
             />

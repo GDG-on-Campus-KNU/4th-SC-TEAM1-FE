@@ -15,13 +15,8 @@ export const signup = async (payload: SignupRequest): Promise<SuccessResponse> =
 };
 
 export const login = async (payload: LoginRequest): Promise<LoginResponse> => {
-  try {
-    const response = await axiosInstance.post<LoginResponse>('/members/login', payload);
-    return response.data;
-  } catch (error) {
-    handleAxiosError(error);
-    throw error;
-  }
+  const response = await axiosInstance.post<LoginResponse>('/members/login', payload);
+  return response.data;
 };
 
 export const logout = async (): Promise<void> => {

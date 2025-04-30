@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '@shared/apis';
 import { useAuthStore } from '@shared/stores/authStore';
 import { accessToken, refreshToken } from '@shared/utils/token';
+import axios from 'axios';
 import { Eye, EyeOff, X } from 'lucide-react';
 
 type LoginModalProps = {
@@ -43,8 +44,19 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
       useAuthStore.getState().login({ userId, nickname });
 
       toast.success(`${nickname}님 환영합니다!`);
-      onClose();
+      onClose(); // ✅ 성공 시에만 닫힘
       navigate('/');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 401) {
+          toast.error('등록되지 않은 계정입니다. 다시 로그인해주세요!');
+        } else {
+          toast.error(error.response?.data?.message || '로그인 중 오류가 발생했습니다.');
+        }
+      } else {
+        toast.error('알 수 없는 오류가 발생했습니다.');
+      }
     } finally {
       setIsLoggingIn(false);
     }
