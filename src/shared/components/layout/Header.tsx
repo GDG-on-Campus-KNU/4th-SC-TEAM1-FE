@@ -2,7 +2,16 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useAuthStore } from '@shared/stores/authStore';
-import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
+import {
+  Bell,
+  Gem,
+  LogOut,
+  Menu,
+  NotebookPen,
+  TreeDeciduous,
+  Trees,
+  UserRound,
+} from 'lucide-react';
 
 import Logo from '../../assets/todak.png';
 
@@ -14,11 +23,16 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
-  // ✅ 로그인 상태 zustand에서 가져오기
-  const { isLoggedIn, nickname } = useAuthStore();
-  const userPoint = 1200; // 예시: 추후 point 상태 추가 가능
+  const { isLoggedIn, user, logout } = useAuthStore();
+  const userPoint = 1200;
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false);
+    window.location.href = '/';
+  };
 
   return (
     <header className="w-full border-b bg-white px-4 py-3 shadow-sm">
@@ -32,39 +46,24 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
         <nav className="hidden items-center gap-6 md:flex">
           {isLoggedIn ? (
             <>
-              {/* 포인트 표시 */}
+              {/* 포인트 */}
               <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-3 py-1 text-sm font-extrabold text-gray-600">
                 <Gem className="h-4 w-4 text-yellow-500" />
                 {userPoint} P
               </div>
 
-              {/* 메뉴 */}
-              <Link
-                to="/"
-                className={`font-medium hover:text-primary ${
-                  isActive('/') ? 'font-semibold text-primary' : 'text-gray-600'
-                }`}
-              >
+              {/* 페이지 링크 */}
+              <Link to="/" className={navClass(isActive('/'))}>
                 마음나무
               </Link>
-              <Link
-                to="/diary"
-                className={`font-medium hover:text-primary ${
-                  isActive('/diary') ? 'font-semibold text-primary' : 'text-gray-600'
-                }`}
-              >
+              <Link to="/diary" className={navClass(isActive('/diary'))}>
                 일기장
               </Link>
-              <Link
-                to="/forests"
-                className={`font-medium hover:text-primary ${
-                  isActive('/forests') ? 'font-semibold text-primary' : 'text-gray-600'
-                }`}
-              >
+              <Link to="/forests" className={navClass(isActive('/forests'))}>
                 이웃숲
               </Link>
 
-              {/* 알림 버튼 */}
+              {/* 알림 */}
               <button className="relative" aria-label="알림">
                 <Bell className="h-5 w-5 text-gray-600 hover:text-primary" />
               </button>
@@ -72,10 +71,10 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
               {/* 마이페이지 */}
               <Link
                 to="/mypage"
-                className="flex items-center gap-1 rounded-full bg-primary/40 px-4 py-1.5 text-xs font-medium text-black/60 transition-colors hover:bg-primary/60"
+                className="flex items-center gap-1 rounded-full bg-primary/40 py-1.5 pl-3 pr-4 text-xs font-medium text-black/60 transition-colors hover:bg-primary/60"
               >
                 <UserRound className="h-4 w-4" />
-                {nickname}
+                {user?.nickname ?? '마이페이지'}
               </Link>
             </>
           ) : (
@@ -97,69 +96,63 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
             </div>
           )}
 
-          {isLoggedIn ? (
-            <button onClick={() => setMenuOpen(!menuOpen)} aria-label="메뉴 열기">
-              <Menu className="h-6 w-6 text-gray-700" />
-            </button>
-          ) : (
-            <button
-              onClick={onLoginClick}
-              className="flex items-center gap-1 rounded-full bg-primary/85 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary/100"
-            >
-              <UserRound className="h-4 w-4" /> 로그인
-            </button>
-          )}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="메뉴 열기"
+            className="text-gray-700"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
         </div>
       </div>
 
-      {/* 모바일 드롭다운 메뉴 */}
+      {/* 모바일 드롭다운 */}
       {menuOpen && isLoggedIn && (
         <div className="mt-2 space-y-2 divide-y divide-gray-200 border-t bg-white px-4 py-2 md:hidden">
           <button
             className="flex items-center gap-2 py-2 text-sm"
-            aria-label="알림"
             onClick={() => setMenuOpen(false)}
           >
             <Bell className="h-4 w-4 text-gray-600" /> 알림
           </button>
-          <Link
-            to="/"
-            onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-2 py-2 text-sm ${
-              isActive('/') ? 'font-semibold text-primary' : 'text-gray-600'
-            }`}
-          >
+          <Link to="/" className={dropdownClass(isActive('/'))} onClick={() => setMenuOpen(false)}>
             <TreeDeciduous className="h-4 w-4" /> 마음나무
           </Link>
           <Link
             to="/diary"
+            className={dropdownClass(isActive('/diary'))}
             onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-2 py-2 text-sm ${
-              isActive('/diary') ? 'font-semibold text-primary' : 'text-gray-600'
-            }`}
           >
             <NotebookPen className="h-4 w-4" /> 일기장
           </Link>
           <Link
             to="/forests"
+            className={dropdownClass(isActive('/forests'))}
             onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-2 py-2 text-sm ${
-              isActive('/forests') ? 'font-semibold text-primary' : 'text-gray-600'
-            }`}
           >
             <Trees className="h-4 w-4" /> 이웃숲
           </Link>
           <Link
             to="/mypage"
+            className={dropdownClass(isActive('/mypage'))}
             onClick={() => setMenuOpen(false)}
-            className={`flex items-center gap-2 py-2 text-sm ${
-              isActive('/mypage') ? 'font-semibold text-primary' : 'text-gray-600'
-            }`}
           >
-            <UserRound className="h-4 w-4" /> {nickname}
+            <UserRound className="h-4 w-4" /> {user?.nickname ?? '마이페이지'}
           </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 py-2 text-sm text-red-500"
+          >
+            <LogOut className="h-4 w-4" /> 로그아웃
+          </button>
         </div>
       )}
     </header>
   );
 };
+
+const navClass = (active: boolean) =>
+  `font-medium hover:text-primary ${active ? 'font-semibold text-primary' : 'text-gray-600'}`;
+
+const dropdownClass = (active: boolean) =>
+  `flex items-center gap-2 py-2 text-sm ${active ? 'font-semibold text-primary' : 'text-gray-600'}`;

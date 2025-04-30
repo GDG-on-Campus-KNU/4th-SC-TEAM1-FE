@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { login } from '@shared/apis';
 import { useAuthStore } from '@shared/stores/authStore';
-import { setAccessToken, setRefreshToken } from '@shared/utils';
+import { accessToken, refreshToken } from '@shared/utils/token';
 import { Eye, EyeOff, X } from 'lucide-react';
 
 type LoginModalProps = {
@@ -29,29 +29,22 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigate = useNavigate();
 
-  const { login: loginToStore } = useAuthStore();
-
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       setIsLoggingIn(true);
 
       const response = await login(data);
-      const { userId, nickname, accessToken, refreshToken } = response.data;
+      if (!response) return;
 
-      setAccessToken(accessToken);
-      setRefreshToken(refreshToken);
+      const { userId, nickname, accessToken: access, refreshToken: refresh } = response.data;
 
-      loginToStore(userId, nickname);
+      accessToken.set(access);
+      refreshToken.set(refresh);
+      useAuthStore.getState().login({ userId, nickname });
 
       toast.success(`${nickname}님 환영합니다!`);
       onClose();
       navigate('/');
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message || '로그인에 실패했습니다.');
-      } else {
-        toast.error('로그인 중 오류가 발생했습니다.');
-      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -73,7 +66,7 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
         <h2 className="mb-6 text-center text-xl font-bold text-gray-800">로그인</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          {/* 아이디 입력 */}
+          {/* 아이디 */}
           <div>
             <input
               type="text"
@@ -84,7 +77,7 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
             {errors.userId && <p className="mt-1 text-xs text-red-500">{errors.userId.message}</p>}
           </div>
 
-          {/* 비밀번호 입력 */}
+          {/* 비밀번호 */}
           <div>
             <div className="relative">
               <input

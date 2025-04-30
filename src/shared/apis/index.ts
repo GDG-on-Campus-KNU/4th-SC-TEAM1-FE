@@ -1,2 +1,2 @@
 export * from './auth';
-export * from './axiosInstance';
+export * from '../lib/axiosInstance';

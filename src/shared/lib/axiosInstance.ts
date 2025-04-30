@@ -1,8 +1,8 @@
 import axios from 'axios';
 
+import { refreshAccessToken } from '../apis/auth';
 import { BASE_URL } from '../constants/api';
-import { clearTokens, getAccessToken } from '../utils/token';
-import { refreshAccessToken } from './auth';
+import { accessToken, clearTokens } from '../utils/token';
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -11,7 +11,7 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = getAccessToken();
+    const token = accessToken.get(); // ✅ 함수에서 객체 메서드로 변경
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,12 +30,11 @@ axiosInstance.interceptors.response.use(
 
       try {
         const newAccessToken = await refreshAccessToken();
-        axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         clearTokens();
-        window.location.href = '/login';
+        window.location.href = '/';
         return Promise.reject(refreshError);
       }
     }
