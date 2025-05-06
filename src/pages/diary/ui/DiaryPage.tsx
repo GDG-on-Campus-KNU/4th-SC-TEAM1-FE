@@ -1,3 +1,41 @@
+import { useState } from 'react';
+
+import Background from '../assets/Diary_background.png';
+import { Calendar } from './Calendar';
+import { DiaryEditor } from './DiaryEditor';
+
 export const DiaryPage = () => {
-  return <div>📔 Diary 페이지 (임시)</div>;
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isEditorOpen, setIsEditorOpen] = useState(true);
+
+  const handleDateSelect = (date?: Date) => {
+    if (date) {
+      setSelectedDate(date);
+      setIsEditorOpen(true);
+    }
+  };
+
+  const handleCloseEditor = () => {
+    setIsEditorOpen(false);
+  };
+
+  return (
+    <div
+      className="flex min-h-screen flex-col bg-cover bg-no-repeat md:flex-row md:items-start md:justify-between"
+      style={{
+        backgroundImage: `url(${Background})`,
+        backgroundPosition: 'bottom center',
+      }}
+    >
+      {/* 캘린더 영역 */}
+      <div className="flex w-full pt-5 md:w-1/2 md:pt-10">
+        <Calendar selected={selectedDate} onSelect={handleDateSelect} />
+      </div>
+
+      {/* 일기 작성 영역 */}
+      <div className="flex w-full justify-center pt-5 md:w-1/2 md:pt-10">
+        {isEditorOpen && <DiaryEditor date={selectedDate} onClose={handleCloseEditor} />}
+      </div>
+    </div>
+  );
 };
