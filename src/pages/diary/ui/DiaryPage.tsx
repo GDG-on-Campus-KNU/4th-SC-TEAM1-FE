@@ -21,19 +21,19 @@ export const DiaryPage = () => {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-cover bg-no-repeat md:flex-row md:items-start md:justify-between"
+      className="flex min-h-screen flex-col bg-cover bg-no-repeat lg:flex-row lg:items-start lg:justify-between"
       style={{
         backgroundImage: `url(${Background})`,
         backgroundPosition: 'bottom center',
       }}
     >
       {/* 캘린더 영역 */}
-      <div className="flex w-full pt-5 md:w-1/2 md:pt-10">
+      <div className="flex w-full pt-5 lg:w-1/2 lg:pt-10">
         <Calendar selected={selectedDate} onSelect={handleDateSelect} />
       </div>
 
       {/* 일기 작성 영역 */}
-      <div className="flex w-full justify-center pt-5 md:w-1/2 md:pt-10">
+      <div className="flex w-full justify-center pt-5 lg:w-1/2 lg:pt-10">
         {isEditorOpen && <DiaryEditor date={selectedDate} onClose={handleCloseEditor} />}
       </div>
     </div>

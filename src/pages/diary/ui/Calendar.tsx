@@ -13,7 +13,7 @@ type CalendarProps = {
 export const Calendar = ({ selected, onSelect }: CalendarProps) => {
   const defaultClassNames = getDefaultClassNames();
   return (
-    <div className="w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:mx-2 sm:max-w-sm md:mx-auto md:max-w-lg md:px-6 md:pb-6 md:pt-4">
+    <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-lg lg:px-6 lg:pb-6 lg:pt-4">
       <DayPicker
         mode="single"
         selected={selected}
@@ -29,9 +29,9 @@ export const Calendar = ({ selected, onSelect }: CalendarProps) => {
         classNames={{
           today: ``,
           selected: ``,
-          root: `${defaultClassNames.root} shadow-lg p-3 pt-10 md:pl-7 md:pb-16`,
+          root: `${defaultClassNames.root} shadow-lg p-3 pt-10 pl-6 lg:pb-16`,
           chevron: `${defaultClassNames.chevron} fill-green-700`,
-          day: `${defaultClassNames.day} md:p-2 md:m-1`,
+          day: `${defaultClassNames.day} lg:p-2 md:m-1`,
         }}
         showOutsideDays
         fixedWeeks
