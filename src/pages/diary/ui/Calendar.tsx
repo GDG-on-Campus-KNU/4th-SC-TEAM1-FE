@@ -29,8 +29,9 @@ export const Calendar = ({ selected, onSelect }: CalendarProps) => {
         classNames={{
           today: ``,
           selected: ``,
-          root: `${defaultClassNames.root} shadow-lg p-3 pt-10 md:pl-20 md:pb-16`,
+          root: `${defaultClassNames.root} shadow-lg p-3 pt-10 md:pl-7 md:pb-16`,
           chevron: `${defaultClassNames.chevron} fill-green-700`,
+          day: `${defaultClassNames.day} md:p-2 md:m-1`,
         }}
         showOutsideDays
         fixedWeeks
