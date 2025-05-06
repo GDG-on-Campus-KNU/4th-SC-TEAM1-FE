@@ -4,6 +4,13 @@ import { refreshAccessToken } from '../apis/auth';
 import { BASE_URL } from '../constants/api';
 import { accessToken, clearTokens } from '../utils/token';
 
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+    _retry?: boolean;
+  }
+}
+
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 5000,
@@ -11,7 +18,7 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = accessToken.get(); // ✅ 함수에서 객체 메서드로 변경
+    const token = accessToken.get();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -28,7 +35,7 @@ axiosInstance.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      originalRequest.url !== '/members/login'
+      !originalRequest.skipAuthRefresh
     ) {
       originalRequest._retry = true;
 
