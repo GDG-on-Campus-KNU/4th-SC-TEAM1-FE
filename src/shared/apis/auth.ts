@@ -6,7 +6,9 @@ import { accessToken, refreshToken as refreshTokenUtil } from '../utils/token';
 
 export const signup = async (payload: SignupRequest): Promise<SuccessResponse> => {
   try {
-    const response = await axiosInstance.post<SuccessResponse>('/members/signup', payload);
+    const response = await axiosInstance.post<SuccessResponse>('/members/signup', payload, {
+      skipAuthRefresh: true,
+    });
     return response.data;
   } catch (error) {
     handleAxiosError(error);
@@ -15,7 +17,9 @@ export const signup = async (payload: SignupRequest): Promise<SuccessResponse> =
 };
 
 export const login = async (payload: LoginRequest): Promise<LoginResponse> => {
-  const response = await axiosInstance.post<LoginResponse>('/members/login', payload);
+  const response = await axiosInstance.post<LoginResponse>('/members/login', payload, {
+    skipAuthRefresh: true,
+  });
   return response.data;
 };
 
@@ -50,7 +54,13 @@ export const deleteAccount = async (): Promise<void> => {
 
 export const checkUserId = async (userId: string): Promise<boolean> => {
   try {
-    const response = await axiosInstance.post('/members/check-userId', { userId });
+    const response = await axiosInstance.post(
+      '/members/check-userId',
+      { userId },
+      {
+        skipAuthRefresh: true,
+      },
+    );
     return response.data.data.exists;
   } catch (error) {
     handleAxiosError(error);
@@ -65,7 +75,13 @@ export const refreshAccessToken = async (): Promise<string> => {
   }
 
   try {
-    const response = await axiosInstance.post('/auth/refresh', { refreshToken: refresh });
+    const response = await axiosInstance.post(
+      '/auth/refresh',
+      { refreshToken: refresh },
+      {
+        skipAuthRefresh: true,
+      },
+    );
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
 
     accessToken.set(newAccessToken);

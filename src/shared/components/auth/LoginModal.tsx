@@ -50,7 +50,7 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         if (status === 401) {
-          toast.error('등록되지 않은 계정입니다. 다시 로그인해주세요!');
+          toast.error('등록되지 않은 계정입니다.');
         } else {
           toast.error(error.response?.data?.message || '로그인 중 오류가 발생했습니다.');
         }
