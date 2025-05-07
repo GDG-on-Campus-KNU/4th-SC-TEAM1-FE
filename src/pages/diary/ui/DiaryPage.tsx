@@ -1,8 +1,7 @@
 import { useState } from 'react';
 
 import Background from '../assets/Diary_background.png';
-import { Calendar } from './Calendar';
-import { DiaryEditor } from './DiaryEditor';
+import { Calendar, DiaryEditor } from '../components';
 
 export const DiaryPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
