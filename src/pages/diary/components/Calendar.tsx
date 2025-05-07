@@ -2,10 +2,9 @@
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
+import '@pages/diary/styles/Dummy.css';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
-
-import '../styles/dummy.css';
 
 type CalendarProps = {
   selected: Date | undefined;
