@@ -20,9 +20,9 @@ export const handleAxiosError = (error: unknown): never => {
         toast.error('로그인이 필요한 서비스예요. 로그인 후 다시 시도해 주세요.');
         throw new Error('로그인이 필요합니다.');
 
-      case 403:
-        toast.error('이 페이지에 접근할 수 있는 권한이 없어요.');
-        throw new Error('권한이 없습니다.');
+      case 404:
+        toast.error(message || '요청하신 페이지를 찾을 수 없어요.');
+        throw new Error('리소스를 찾을 수 없습니다.');
 
       case 409:
         toast.error(message || '이미 사용 중인 정보예요. 다른 값으로 시도해 주세요.');
