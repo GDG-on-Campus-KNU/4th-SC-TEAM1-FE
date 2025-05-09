@@ -19,7 +19,7 @@ export const Calendar = ({ selected, onSelect }: CalendarProps) => {
   today.setHours(0, 0, 0, 0);
 
   return (
-    <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-lg lg:px-6 lg:pb-6 lg:pt-4">
+    <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
       <DayPicker
         mode="single"
         selected={selected}
@@ -40,7 +40,7 @@ export const Calendar = ({ selected, onSelect }: CalendarProps) => {
         classNames={{
           today: ``,
           selected: ``,
-          root: `${defaultClassNames.root} shadow-lg p-3 pt-10 pl-6 lg:pb-16`,
+          root: `${defaultClassNames.root} shadow-lg p-3 pt-10 pl-8 lg:pl-16 lg:pb-16`,
           chevron: `${defaultClassNames.chevron} fill-green-700`,
           day: `${defaultClassNames.day} lg:p-2 md:m-1`,
         }}
