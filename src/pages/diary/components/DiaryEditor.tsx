@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { Listbox } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronsUpDown } from 'lucide-react';
+import remarkBreaks from 'remark-breaks';
 
 import { createDiary, generateStorageUUID } from '../apis';
 
@@ -130,6 +131,7 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
           <p className="mb-2 font-semibold text-gray-700">미리보기</p>
           <div className="space-y-2 leading-relaxed text-gray-800">
             <ReactMarkdown
+              remarkPlugins={[remarkBreaks]}
               components={{
                 h1: ({ ...props }) => <h1 className="text-xl font-bold" {...props} />,
                 h2: ({ ...props }) => <h2 className="text-lg font-semibold" {...props} />,
