@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 
 import { Listbox } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, HelpCircle } from 'lucide-react';
 import remarkBreaks from 'remark-breaks';
 
 import { createDiary, generateStorageUUID } from '../apis';
@@ -28,6 +28,8 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
   const [markdown, setMarkdown] = useState('');
   const [selectedEmotion, setSelectedEmotion] = useState(emotions[0]);
   const [storageUUID, setStorageUUID] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const queryClient = useQueryClient();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -114,9 +116,36 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
       </div>
 
       <div className="mb-4">
-        <label className="mb-1 block text-sm font-medium text-gray-700">
+        <label className="mb-1 flex items-center gap-1 text-sm font-medium text-gray-700">
           일기 내용 (Markdown 지원)
+          <button
+            type="button"
+            onClick={() => setShowTooltip(!showTooltip)}
+            className="text-gray-400 hover:text-primary"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
         </label>
+        {showTooltip && (
+          <div className="mb-2 rounded-lg border border-primary/30 bg-green-50 p-4 text-sm text-gray-700 shadow-sm">
+            <p className="mb-2 font-semibold text-primary">✨ 마크다운 문법 도움말</p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>
+                <code>#</code>, <code>##</code> : 제목1, 제목2
+              </li>
+              <li>
+                <code>-</code>, <code>*</code> : 리스트
+              </li>
+              <li>
+                <code>**굵게**</code>, <code>*기울임*</code> : 텍스트 강조
+              </li>
+              <li>
+                <code>---</code> : 구분선
+              </li>
+              <li>엔터 두 번: 줄 바꿈</li>
+            </ul>
+          </div>
+        )}
         <textarea
           rows={18}
           placeholder="오늘 있었던 일을 Markdown 형식으로 적어보세요."
