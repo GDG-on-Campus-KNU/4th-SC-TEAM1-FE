@@ -20,7 +20,7 @@ export const DiaryPage = () => {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-cover bg-no-repeat lg:flex-row lg:items-start lg:justify-between"
+      className="flex min-h-screen flex-col bg-cover bg-fixed bg-no-repeat lg:flex-row lg:items-start lg:justify-between"
       style={{
         backgroundImage: `url(${Background})`,
         backgroundPosition: 'bottom center',
