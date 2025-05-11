@@ -1,13 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
 import { Listbox } from '@headlessui/react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronsUpDown } from 'lucide-react';
 
-type Props = {
-  date: Date;
-  onClose: () => void;
-};
+import { createDiary, generateStorageUUID } from '../apis';
 
 const emotions = [
   { name: 'HAPPY', emoji: '😊' },
@@ -15,15 +14,57 @@ const emotions = [
   { name: 'ANGRY', emoji: '😡' },
   { name: 'EXCITED', emoji: '😆' },
   { name: 'NEUTRAL', emoji: '😐' },
-];
+] as const;
+
+type EmotionType = (typeof emotions)[number]['name'];
+
+type Props = {
+  date: Date;
+  onClose: () => void;
+};
 
 export const DiaryEditor = ({ date, onClose }: Props) => {
   const [markdown, setMarkdown] = useState('');
   const [selectedEmotion, setSelectedEmotion] = useState(emotions[0]);
+  const [storageUUID, setStorageUUID] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+
+  useEffect(() => {
+    const initUUID = async () => {
+      try {
+        const uuid = await generateStorageUUID();
+        setStorageUUID(uuid);
+      } catch {
+        toast.error('스토리지를 초기화하지 못했어요. 다시 시도해 주세요.');
+      }
+    };
+    initUUID();
+  }, []);
+
+  const handleSave = async () => {
+    if (!storageUUID) {
+      toast.error('스토리지 UUID를 불러오는 중입니다. 잠시만 기다려 주세요.');
+      return;
+    }
+
+    try {
+      await createDiary({
+        content: markdown,
+        emotion: selectedEmotion.name as EmotionType,
+        storageUUID,
+      });
+      toast.success('일기가 저장되었어요!');
+      queryClient.invalidateQueries({ queryKey: ['monthlyDiaries', year, month] });
+      onClose();
+    } catch {
+      toast.error('일기 저장에 실패했어요. 다시 시도해 주세요.');
+    }
+  };
 
   return (
     <div className="relative mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
-      {/* 닫기 버튼 */}
       <button
         onClick={onClose}
         className="absolute right-3 top-3 z-10 text-lg text-gray-400 transition hover:scale-110 hover:text-gray-600"
@@ -35,7 +76,6 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         {date.toLocaleDateString()}의 일기
       </h2>
 
-      {/* 감정 입력 */}
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-gray-700">오늘의 감정</label>
         <Listbox value={selectedEmotion} onChange={setSelectedEmotion}>
@@ -72,7 +112,6 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         </Listbox>
       </div>
 
-      {/* 내용 입력 (Markdown) */}
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-gray-700">
           일기 내용 (Markdown 지원)
@@ -86,7 +125,6 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         />
       </div>
 
-      {/* 미리보기 */}
       {markdown.trim() !== '' && (
         <div className="mb-4 rounded-md border bg-gray-50 p-4 text-sm">
           <p className="mb-2 font-semibold text-gray-700">미리보기</p>
@@ -106,8 +144,10 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         </div>
       )}
 
-      {/* 저장 버튼 */}
-      <button className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90">
+      <button
+        onClick={handleSave}
+        className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90"
+      >
         저장하기
       </button>
     </div>

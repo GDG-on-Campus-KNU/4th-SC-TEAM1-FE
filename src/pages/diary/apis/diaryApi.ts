@@ -14,3 +14,25 @@ export const fetchMonthlyDiaries = async (
     handleAxiosError(error);
   }
 };
+
+export const generateStorageUUID = async (): Promise<string> => {
+  try {
+    const response = await axiosInstance.get('/make/uuid');
+    return response.data.data.uuid;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const createDiary = async (payload: {
+  content: string;
+  emotion: 'HAPPY' | 'SAD' | 'ANGRY' | 'EXCITED' | 'NEUTRAL';
+  storageUUID: string;
+}): Promise<void> => {
+  try {
+    await axiosInstance.post('/diaries', payload);
+  } catch (error) {
+    handleAxiosError(error);
+  }
+};
