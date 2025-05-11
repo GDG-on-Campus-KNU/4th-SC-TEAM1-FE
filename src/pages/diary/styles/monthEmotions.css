@@ -1,0 +1,94 @@
+.my-happy-class {
+  position: relative;
+}
+
+.my-happy-class::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages//diary/assets/Emotion_Happy.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-sad-class {
+  position: relative;
+}
+
+.my-sad-class::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages//diary/assets/Emotion_Sad.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-angry-class {
+  position: relative;
+}
+
+.my-angry-class::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages//diary/assets/Emotion_Angry.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-excited-class {
+  position: relative;
+}
+
+.my-excited-class::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages//diary/assets/Emotion_Excited.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-angry-class {
+  position: relative;
+}
+
+.my-angry-class::after {
+  content: '';
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages//diary/assets/Emotion_Angry.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}

@@ -78,7 +78,7 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
           일기 내용 (Markdown 지원)
         </label>
         <textarea
-          rows={20}
+          rows={18}
           placeholder="오늘 있었던 일을 Markdown 형식으로 적어보세요."
           className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           value={markdown}
