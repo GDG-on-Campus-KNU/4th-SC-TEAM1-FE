@@ -15,7 +15,7 @@ type CalendarProps = {
   onSelect: (date: Date | undefined) => void;
 };
 
-const mapDiaryDatesByEmotion = (diaries: DiarySummary[]) => {
+const mapDiaryDatesByEmotion = (data: DiarySummary[] | undefined) => {
   const emotionMap: Record<string, Date[]> = {
     HAPPY: [],
     SAD: [],
@@ -24,9 +24,9 @@ const mapDiaryDatesByEmotion = (diaries: DiarySummary[]) => {
     NEUTRAL: [],
   };
 
-  diaries.forEach(({ createdAt, emotion }) => {
+  (data ?? []).forEach(({ createdAt, emotion }) => {
     const [y, m, d] = createdAt.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
+    const date = new Date(y, m - 1, d); // month 보정
     if (emotionMap[emotion]) {
       emotionMap[emotion].push(date);
     }

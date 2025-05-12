@@ -12,6 +12,7 @@ export const fetchMonthlyDiaries = async (
     return response.data.data;
   } catch (error) {
     handleAxiosError(error);
+    throw error;
   }
 };
 

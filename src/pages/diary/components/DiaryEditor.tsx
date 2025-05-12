@@ -75,9 +75,7 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         ✕
       </button>
 
-      <h2 className="mb-4 text-lg font-semibold text-primary">
-        {date.toLocaleDateString()}의 일기
-      </h2>
+      <h2 className="mb-4 text-lg font-semibold text-primary">{date.toLocaleDateString()} 일기</h2>
 
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-gray-700">오늘의 감정</label>
