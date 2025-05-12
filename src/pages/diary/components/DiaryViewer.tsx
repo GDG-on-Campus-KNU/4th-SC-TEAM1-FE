@@ -1,8 +1,9 @@
 import ReactMarkdown from 'react-markdown';
 
-type Props = {
+interface DiaryViewerProps {
+  date: Date;
   onClose: () => void;
-};
+}
 
 const exampleDiary = {
   date: '2025-05-07',
@@ -29,8 +30,8 @@ const exampleDiary = {
   `,
 };
 
-export const DiaryViewer = ({ onClose }: Props) => {
-  const date = new Date(exampleDiary.date).toLocaleDateString();
+export const DiaryViewer = ({ date, onClose }: DiaryViewerProps) => {
+  const displayDate = date.toLocaleDateString();
 
   return (
     <div className="relative mx-auto w-full rounded-xl bg-white px-4 pb-6 pt-4 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pt-6">
@@ -42,7 +43,7 @@ export const DiaryViewer = ({ onClose }: Props) => {
         ✕
       </button>
 
-      <h2 className="mb-2 text-lg font-semibold text-primary">{date}의 일기</h2>
+      <h2 className="mb-2 text-lg font-semibold text-primary">{displayDate}의 일기</h2>
 
       <p className="mb-4 text-sm text-gray-600">
         오늘의 감정:{' '}

@@ -3,77 +3,52 @@ import { DayPicker, getDefaultClassNames } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
 import '@pages/diary/styles/monthEmotions.css';
-import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
-import { fetchMonthlyDiaries } from '../apis';
-import type { DiarySummary } from '../types';
-
-type CalendarProps = {
+interface CalendarProps {
   selected: Date | undefined;
-  onSelect: (date: Date | undefined) => void;
-};
+  onDayClick: (date: Date) => void;
+  diaryDates: Record<string, string>; // YYYY-MM-DD => emotion
+}
 
-const mapDiaryDatesByEmotion = (data: DiarySummary[] | undefined) => {
-  const emotionMap: Record<string, Date[]> = {
-    HAPPY: [],
-    SAD: [],
-    ANGRY: [],
-    EXCITED: [],
-    NEUTRAL: [],
-  };
+export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) => {
+  const today = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
 
-  (data ?? []).forEach(({ createdAt, emotion }) => {
-    const [y, m, d] = createdAt.split('-').map(Number);
-    const date = new Date(y, m - 1, d); // month 보정
-    if (emotionMap[emotion]) {
-      emotionMap[emotion].push(date);
-    }
-  });
-
-  return emotionMap;
-};
-
-export const Calendar = ({ selected, onSelect }: CalendarProps) => {
   const defaultClassNames = getDefaultClassNames();
 
-  const todayDate = new Date();
-  todayDate.setHours(0, 0, 0, 0);
-  const year = todayDate.getFullYear();
-  const month = todayDate.getMonth() + 1;
-
-  const { data: diaryData = [] } = useQuery({
-    queryKey: ['monthlyDiaries', year, month],
-    queryFn: () => fetchMonthlyDiaries(year, month),
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const {
-    HAPPY: happyDays,
-    SAD: sadDays,
-    ANGRY: angryDays,
-    EXCITED: excitedDays,
-    NEUTRAL: neutralDays,
-  } = useMemo(() => mapDiaryDatesByEmotion(diaryData), [diaryData]);
+  const getDatesByEmotion = (emotion: string) =>
+    Object.entries(diaryDates)
+      .filter(([, value]) => value === emotion)
+      .map(([dateStr]) => new Date(dateStr));
 
   return (
     <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
       <DayPicker
         mode="single"
         selected={selected}
-        onSelect={onSelect}
-        disabled={{ after: todayDate }}
+        onDayClick={onDayClick}
+        disabled={(date) => {
+          const dateStr = format(date, 'yyyy-MM-dd');
+          const isToday = date.toDateString() === today.toDateString();
+          const isFuture = date.getTime() > today.getTime();
+
+          return (!diaryDates[dateStr] && !isToday) || isFuture;
+        }}
         locale={ko}
         formatters={{
           formatCaption: (date) => format(date, 'yyyy년 M월', { locale: ko }),
         }}
         modifiers={{
-          happy: happyDays,
-          sad: sadDays,
-          angry: angryDays,
-          excited: excitedDays,
-          neutral: neutralDays,
+          happy: getDatesByEmotion('HAPPY'),
+          sad: getDatesByEmotion('SAD'),
+          angry: getDatesByEmotion('ANGRY'),
+          excited: getDatesByEmotion('EXCITED'),
+          neutral: getDatesByEmotion('NEUTRAL'),
         }}
         modifiersClassNames={{
           selected: 'bg-primary text-white font-bold',
