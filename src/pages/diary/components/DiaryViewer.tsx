@@ -68,7 +68,9 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
   if (!diary || !isReadyToRender) {
     return (
       <div className="mx-auto w-full max-w-xl rounded-xl bg-white px-6 py-8 text-center shadow-md">
-        <div className="mb-3 text-sm text-gray-700">기억을 꺼내는 중이에요...</div>
+        <div className="mb-4 text-[15px] font-normal leading-relaxed text-gray-800">
+          잠시만요, 추억을 펼치는 중이에요... 📖
+        </div>
         <div className="flex justify-center space-x-2">
           <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-primary"></span>
           <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-primary [animation-delay:.15s]"></span>
