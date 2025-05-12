@@ -7,6 +7,7 @@ import remarkBreaks from 'remark-breaks';
 
 import { deleteDiary, fetchDiaryDetail } from '../apis';
 import type { DiaryDetail } from '../types';
+import { CommentSection } from './CommentSection';
 import { DiaryEditor } from './DiaryEditor';
 
 const emotionLabels: Record<string, string> = {
@@ -67,7 +68,7 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
 
   if (!diary || !isReadyToRender) {
     return (
-      <div className="mx-auto w-full max-w-xl rounded-xl bg-white px-6 py-8 text-center shadow-md">
+      <div className="mx-auto w-full rounded-xl bg-white px-6 py-8 text-center shadow-md sm:max-w-sm lg:max-w-xl">
         <div className="mb-4 text-[15px] font-normal leading-relaxed text-gray-800">
           잠시만요, 추억을 펼치는 중이에요... 📖
         </div>
@@ -91,8 +92,8 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
         storageUUID={diary.storageUUID}
         onClose={onClose}
         onSwitchToViewer={(updatedDiary) => {
-          setDiary(updatedDiary); // 수정된 데이터 반영
-          setIsEditing(false); // 다시 뷰어 모드로 전환
+          setDiary(updatedDiary);
+          setIsEditing(false);
         }}
       />
     );
@@ -166,6 +167,7 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
           </button>
         </div>
       )}
+      <CommentSection diaryId={diary.diaryId} />
     </div>
   );
 };
