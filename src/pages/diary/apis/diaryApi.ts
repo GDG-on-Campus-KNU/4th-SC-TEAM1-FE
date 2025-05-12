@@ -47,3 +47,12 @@ export const fetchDiaryDetail = async (diaryId: number): Promise<DiaryDetail | u
     throw error;
   }
 };
+
+export const deleteDiary = async (diaryId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/diaries/${diaryId}`);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};

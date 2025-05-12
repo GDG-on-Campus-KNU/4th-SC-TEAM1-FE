@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
-import { fetchDiaryDetail } from '../apis';
+import { deleteDiary, fetchDiaryDetail } from '../apis';
 import type { DiaryDetail } from '../types';
 import { DiaryEditor } from './DiaryEditor';
 
@@ -10,9 +10,10 @@ type DiaryViewerProps = {
   diaryId: number;
   date: Date;
   onClose: () => void;
+  onDeleted: () => void;
 };
 
-export const DiaryViewer = ({ diaryId, date, onClose }: DiaryViewerProps) => {
+export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerProps) => {
   const [diary, setDiary] = useState<DiaryDetail | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -39,7 +40,6 @@ export const DiaryViewer = ({ diaryId, date, onClose }: DiaryViewerProps) => {
     );
   }
 
-  // ✅ 수정 모드로 전환 시 DiaryEditor 렌더링
   if (isEditing) {
     return <DiaryEditor date={date} onClose={onClose} />;
   }
@@ -85,8 +85,17 @@ export const DiaryViewer = ({ diaryId, date, onClose }: DiaryViewerProps) => {
             수정
           </button>
           <button
-            onClick={() => {
-              toast('삭제 기능은 아직 구현되지 않았어요.');
+            onClick={async () => {
+              const confirmDelete = confirm('정말 이 일기를 삭제하시겠어요?');
+              if (!confirmDelete) return;
+
+              try {
+                await deleteDiary(diaryId);
+                toast.success('일기가 삭제되었습니다.');
+                onDeleted();
+              } catch {
+                toast.error('삭제에 실패했어요. 다시 시도해주세요.');
+              }
             }}
             className="rounded-md border border-red-400 px-4 py-1 text-sm text-red-500 transition hover:bg-red-50"
           >

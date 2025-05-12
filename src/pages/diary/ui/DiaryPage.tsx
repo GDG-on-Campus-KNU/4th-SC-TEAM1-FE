@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 
 import { fetchMonthlyDiaries } from '../apis';
@@ -19,6 +19,8 @@ export const DiaryPage = () => {
 
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
+
+  const queryClient = useQueryClient();
 
   const { data: diaryData = [] } = useQuery({
     queryKey: ['monthlyDiaries', year, month],
@@ -42,7 +44,7 @@ export const DiaryPage = () => {
 
     setSelectedDate(today);
     setViewMode(hasDiaryToday ? 'viewer' : 'editor');
-  }, [diaryData, today]); // ✅ today 추가해도 now는 고정되어 있으므로 경고 없음
+  }, [diaryData, today]);
 
   const handleDayClick = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -50,13 +52,13 @@ export const DiaryPage = () => {
     const isToday = dateStr === todayStr;
 
     if (diaryDates[dateStr]) {
-      setSelectedDate(date); // 이 줄은 의미상 유지
+      setSelectedDate(date);
       setViewMode('viewer');
     } else if (isToday) {
       setSelectedDate(date);
       setViewMode('editor');
     } else {
-      setSelectedDate(date); // 📌 선택은 유지해야 함
+      setSelectedDate(date);
       setViewMode('none');
     }
   };
@@ -69,6 +71,21 @@ export const DiaryPage = () => {
     const selectedStr = format(selectedDate, 'yyyy-MM-dd');
     return diaryData.find((entry) => entry.createdAt === selectedStr);
   }, [diaryData, selectedDate]);
+
+  const handleDiaryDeleted = (deletedDate: Date) => {
+    const todayStr = format(today, 'yyyy-MM-dd');
+    const deletedStr = format(deletedDate, 'yyyy-MM-dd');
+    const isToday = deletedStr === todayStr;
+
+    queryClient.invalidateQueries({ queryKey: ['monthlyDiaries', year, month] });
+
+    if (isToday) {
+      setViewMode('editor');
+    } else {
+      setSelectedDate(new Date(today));
+      setViewMode('editor');
+    }
+  };
 
   return (
     <div
@@ -87,7 +104,12 @@ export const DiaryPage = () => {
       <div className="flex w-full justify-center pt-5 lg:w-1/2 lg:pt-10">
         {viewMode === 'editor' && <DiaryEditor date={selectedDate} onClose={handleClose} />}
         {viewMode === 'viewer' && selectedDiary && (
-          <DiaryViewer diaryId={selectedDiary.diaryId} date={selectedDate} onClose={handleClose} />
+          <DiaryViewer
+            diaryId={selectedDiary.diaryId}
+            date={selectedDate}
+            onClose={handleClose}
+            onDeleted={() => handleDiaryDeleted(selectedDate)}
+          />
         )}
       </div>
     </div>
