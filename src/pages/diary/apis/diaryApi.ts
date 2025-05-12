@@ -56,3 +56,18 @@ export const deleteDiary = async (diaryId: number): Promise<void> => {
     throw error;
   }
 };
+
+export const updateDiary = async (
+  diaryId: number,
+  payload: {
+    content: string;
+    emotion: 'HAPPY' | 'SAD' | 'ANGRY' | 'EXCITED' | 'NEUTRAL';
+  },
+): Promise<void> => {
+  try {
+    await axiosInstance.put(`/diaries/${diaryId}`, payload);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};

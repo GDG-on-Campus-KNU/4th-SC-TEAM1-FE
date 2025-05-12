@@ -11,4 +11,5 @@ export type DiaryDetail = {
   emotion: 'HAPPY' | 'SAD' | 'ANGRY' | 'EXCITED' | 'NEUTRAL';
   storageUUID: string;
   isWriter: boolean;
+  date?: Date;
 };

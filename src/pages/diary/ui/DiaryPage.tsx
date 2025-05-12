@@ -39,7 +39,6 @@ export const DiaryPage = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // 최소 3초 로딩 유지
   useEffect(() => {
     if (!isLoading) {
       const MIN_DELAY = 3000;
@@ -54,7 +53,6 @@ export const DiaryPage = () => {
     }
   }, [isLoading, startTime]);
 
-  // 에러 시 메인으로 이동
   useEffect(() => {
     if (isError) {
       toast.error('세션이 만료되었어요. 다시 로그인해주세요.');
@@ -93,7 +91,8 @@ export const DiaryPage = () => {
     setSelectedDate(date);
 
     if (diaryDates[dateStr]) {
-      setViewMode('viewer');
+      setViewMode('none');
+      requestAnimationFrame(() => setViewMode('viewer'));
     } else if (isToday) {
       setViewMode('editor');
     } else {
@@ -122,7 +121,6 @@ export const DiaryPage = () => {
     setViewMode('none');
   };
 
-  // 로딩 화면
   if (!showPage || isLoading) {
     return (
       <div
@@ -151,7 +149,7 @@ export const DiaryPage = () => {
 
   return (
     <div
-      className="flex flex-col bg-cover bg-fixed bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)] lg:flex-row lg:items-start lg:justify-between"
+      className="flex min-h-screen flex-col bg-cover bg-fixed bg-no-repeat lg:flex-row lg:items-start lg:justify-between"
       style={{
         backgroundImage: `url(${Background})`,
         backgroundPosition: 'bottom center',
@@ -164,7 +162,9 @@ export const DiaryPage = () => {
 
       {/* 일기 작성 or 보기 영역 */}
       <div className="flex w-full justify-center pt-5 lg:w-1/2 lg:pt-10">
-        {viewMode === 'editor' && <DiaryEditor date={selectedDate} onClose={closeDiary} />}
+        {viewMode === 'editor' && (
+          <DiaryEditor mode="create" date={selectedDate} onClose={closeDiary} />
+        )}
         {viewMode === 'viewer' && selectedDiary && (
           <DiaryViewer
             diaryId={selectedDiary.diaryId}

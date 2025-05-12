@@ -8,7 +8,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Check, ChevronsUpDown, HelpCircle } from 'lucide-react';
 import remarkBreaks from 'remark-breaks';
 
-import { createDiary, generateStorageUUID } from '../apis';
+import { createDiary, fetchDiaryDetail, generateStorageUUID, updateDiary } from '../apis';
+import type { DiaryDetail } from '../types';
 
 const emotions = [
   { name: 'HAPPY', emoji: '😊' },
@@ -18,7 +19,7 @@ const emotions = [
   { name: 'NEUTRAL', emoji: '😐' },
 ] as const;
 
-type EmotionType = (typeof emotions)[number]['name'];
+export type EmotionType = (typeof emotions)[number]['name'];
 
 type FormValues = {
   content: string;
@@ -26,14 +27,28 @@ type FormValues = {
 };
 
 type Props = {
+  mode: 'create' | 'edit';
   date: Date;
   onClose: () => void;
+  onSwitchToViewer?: (updatedDiary: DiaryDetail & { date: Date }) => void;
+  diaryId?: number;
+  defaultContent?: string;
+  defaultEmotion?: EmotionType;
+  storageUUID?: string;
 };
 
-export const DiaryEditor = ({ date, onClose }: Props) => {
-  const [storageUUID, setStorageUUID] = useState<string | null>(null);
+export const DiaryEditor = ({
+  mode,
+  date,
+  onClose,
+  onSwitchToViewer,
+  diaryId,
+  defaultContent = '',
+  defaultEmotion = 'HAPPY',
+  storageUUID: passedUUID,
+}: Props) => {
+  const [storageUUID, setStorageUUID] = useState<string | null>(passedUUID ?? null);
   const [showTooltip, setShowTooltip] = useState(false);
-
   const queryClient = useQueryClient();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
@@ -46,44 +61,62 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
     formState: { errors, isValid },
   } = useForm<FormValues>({
     defaultValues: {
-      emotion: 'HAPPY',
-      content: '',
+      emotion: defaultEmotion,
+      content: defaultContent,
     },
     mode: 'onChange',
   });
 
   const content = watch('content');
-  const selectedEmotion = emotions.find((e) => e.name === watch('emotion'))!;
+  const emotionValue = watch('emotion');
+  const selectedEmotion = emotions.find((e) => e.name === emotionValue) ?? emotions[0];
 
   useEffect(() => {
-    const initUUID = async () => {
-      try {
-        const uuid = await generateStorageUUID();
-        setStorageUUID(uuid);
-      } catch {
-        toast.error('스토리지를 초기화하지 못했어요. 다시 시도해 주세요.');
-      }
-    };
-    initUUID();
-  }, []);
+    if (mode === 'create' && !storageUUID) {
+      const initUUID = async () => {
+        try {
+          const uuid = await generateStorageUUID();
+          setStorageUUID(uuid);
+        } catch {
+          toast.error('스토리지를 초기화하지 못했어요. 다시 시도해 주세요.');
+        }
+      };
+      initUUID();
+    }
+  }, [mode, storageUUID]);
 
   const onSubmit = async (data: FormValues) => {
-    if (!storageUUID) {
-      toast.error('스토리지 UUID를 불러오는 중입니다. 잠시만 기다려 주세요.');
-      return;
-    }
-
     try {
-      await createDiary({
-        content: data.content,
-        emotion: data.emotion,
-        storageUUID,
-      });
-      toast.success('일기가 저장되었어요!');
+      if (mode === 'create') {
+        if (!storageUUID) {
+          toast.error('스토리지 UUID를 불러오는 중입니다. 잠시만 기다려 주세요.');
+          return;
+        }
+        await createDiary({ ...data, storageUUID });
+        toast.success('일기가 저장되었어요!');
+        onClose();
+      } else {
+        if (!diaryId) {
+          toast.error('잘못된 접근입니다. diaryId가 필요해요.');
+          return;
+        }
+        await updateDiary(diaryId, {
+          content: data.content,
+          emotion: data.emotion,
+        });
+        toast.success('일기가 수정되었어요!');
+
+        const updatedDiary = await fetchDiaryDetail(diaryId);
+        if (updatedDiary) {
+          onSwitchToViewer?.({ ...updatedDiary, date: new Date(updatedDiary.createdAt) });
+        } else {
+          toast.error('업데이트된 일기를 불러오지 못했어요.');
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['monthlyDiaries', year, month] });
-      onClose();
     } catch {
-      toast.error('일기 저장에 실패했어요. 다시 시도해 주세요.');
+      toast.error('저장 중 문제가 발생했어요. 다시 시도해 주세요.');
     }
   };
 
@@ -176,7 +209,7 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         {errors.content && <p className="mt-1 text-sm text-red-500">{errors.content.message}</p>}
       </div>
 
-      {/* 마크다운 미리보기 */}
+      {/* 미리보기 */}
       {content.trim() !== '' && (
         <div className="mb-4 rounded-md border bg-gray-50 p-4 text-sm">
           <p className="mb-2 font-semibold text-gray-700">미리보기</p>
@@ -197,13 +230,12 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         </div>
       )}
 
-      {/* 저장 버튼 */}
       <button
         onClick={handleSubmit(onSubmit)}
         disabled={!isValid}
         className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/40"
       >
-        저장하기
+        {mode === 'create' ? '저장하기' : '수정하기'}
       </button>
     </div>
   );
