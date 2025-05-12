@@ -1,7 +1,7 @@
 import { axiosInstance } from '@shared/lib';
 import { handleAxiosError } from '@shared/utils';
 
-import type { DiarySummary } from '../types';
+import type { DiaryDetail, DiarySummary } from '../types';
 
 export const fetchMonthlyDiaries = async (
   year: number,
@@ -35,5 +35,15 @@ export const createDiary = async (payload: {
     await axiosInstance.post('/diaries', payload);
   } catch (error) {
     handleAxiosError(error);
+  }
+};
+
+export const fetchDiaryDetail = async (diaryId: number): Promise<DiaryDetail | undefined> => {
+  try {
+    const response = await axiosInstance.get(`/diaries/${diaryId}`);
+    return response.data.data;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
   }
 };

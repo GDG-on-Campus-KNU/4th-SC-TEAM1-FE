@@ -9,7 +9,7 @@ import { ko } from 'date-fns/locale';
 interface CalendarProps {
   selected: Date | undefined;
   onDayClick: (date: Date) => void;
-  diaryDates: Record<string, string>; // YYYY-MM-DD => emotion
+  diaryDates: Record<string, string>;
 }
 
 export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) => {

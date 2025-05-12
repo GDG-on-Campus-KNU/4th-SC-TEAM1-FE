@@ -1,37 +1,48 @@
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
-interface DiaryViewerProps {
+import { fetchDiaryDetail } from '../apis';
+import type { DiaryDetail } from '../types';
+import { DiaryEditor } from './DiaryEditor';
+
+type DiaryViewerProps = {
+  diaryId: number;
   date: Date;
   onClose: () => void;
-}
-
-const exampleDiary = {
-  date: '2025-05-07',
-  emotion: {
-    name: 'HAPPY' as const,
-    emoji: '😊',
-  },
-  markdown: `
-# 😊 즐거운 하루였어요!
-
-## 오전
-- 아침에 일찍 일어나서 상쾌한 기분으로 하루를 시작했어요.
-- 따뜻한 커피 한 잔과 함께 일기장을 열었어요.
-
-## 오후
-- 친구랑 공원에서 산책을 했어요.
-- 벤치에 앉아 햇살을 쬐며 이야기 나눴는데 너무 좋았어요 🌳🌞
-
-## 저녁
-- 가족과 함께 저녁을 먹었어요. 오늘 메뉴는 된장찌개!
-- 하루를 마무리하며 차 한잔 마시고 조용히 책을 읽었어요.
-
-> "작은 일상 속에서도 행복은 충분히 피어난다."
-  `,
 };
 
-export const DiaryViewer = ({ date, onClose }: DiaryViewerProps) => {
+export const DiaryViewer = ({ diaryId, date, onClose }: DiaryViewerProps) => {
+  const [diary, setDiary] = useState<DiaryDetail | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
   const displayDate = date.toLocaleDateString();
+
+  useEffect(() => {
+    const loadDiary = async () => {
+      try {
+        const detail = await fetchDiaryDetail(diaryId);
+        setDiary(detail ?? null);
+      } catch {
+        toast.error('일기 데이터를 불러오지 못했어요.');
+        onClose();
+      }
+    };
+    loadDiary();
+  }, [diaryId, onClose]);
+
+  if (!diary) {
+    return (
+      <div className="mx-auto w-full max-w-xl rounded-xl bg-white px-6 py-6 text-center text-sm text-gray-600 shadow-md">
+        일기 내용을 불러오는 중입니다...
+      </div>
+    );
+  }
+
+  // ✅ 수정 모드로 전환 시 DiaryEditor 렌더링
+  if (isEditing) {
+    return <DiaryEditor date={date} onClose={onClose} />;
+  }
 
   return (
     <div className="relative mx-auto w-full rounded-xl bg-white px-4 pb-6 pt-4 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pt-6">
@@ -48,29 +59,41 @@ export const DiaryViewer = ({ date, onClose }: DiaryViewerProps) => {
       <p className="mb-4 text-sm text-gray-600">
         오늘의 감정:{' '}
         <span className="text-base">
-          {exampleDiary.emotion.emoji} {exampleDiary.emotion.name}
+          {diary.emotion === 'HAPPY'
+            ? '😊 행복'
+            : diary.emotion === 'SAD'
+              ? '😢 슬픔'
+              : diary.emotion === 'ANGRY'
+                ? '😡 화남'
+                : diary.emotion === 'EXCITED'
+                  ? '😆 신남'
+                  : '😐 보통'}
         </span>
       </p>
 
       <div className="prose prose-sm max-w-none leading-relaxed text-gray-800">
-        <ReactMarkdown
-          components={{
-            h1: ({ ...props }) => <h1 className="text-xl font-bold text-primary" {...props} />,
-            h2: ({ ...props }) => <h2 className="text-lg font-semibold text-primary" {...props} />,
-            h3: ({ ...props }) => <h3 className="text-base font-medium text-primary" {...props} />,
-            p: ({ ...props }) => <p className="text-sm" {...props} />,
-            li: ({ ...props }) => <li className="ml-4 list-disc text-sm" {...props} />,
-            blockquote: ({ ...props }) => (
-              <blockquote
-                className="border-l-4 border-primary pl-4 italic text-gray-600"
-                {...props}
-              />
-            ),
-          }}
-        >
-          {exampleDiary.markdown}
-        </ReactMarkdown>
+        <ReactMarkdown>{diary.content}</ReactMarkdown>
       </div>
+
+      {/* 작성자인 경우만 수정/삭제 버튼 노출 */}
+      {diary.isWriter && (
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="rounded-md border border-primary px-4 py-1 text-sm text-primary transition hover:bg-primary/10"
+          >
+            수정
+          </button>
+          <button
+            onClick={() => {
+              toast('삭제 기능은 아직 구현되지 않았어요.');
+            }}
+            className="rounded-md border border-red-400 px-4 py-1 text-sm text-red-500 transition hover:bg-red-50"
+          >
+            삭제
+          </button>
+        </div>
+      )}
     </div>
   );
 };

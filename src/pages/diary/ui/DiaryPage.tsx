@@ -11,7 +11,6 @@ export const DiaryPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'editor' | 'viewer' | 'none'>('none');
 
-  // ✅ today를 useMemo로 고정하여 useEffect 의존성 경고 해결
   const today = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -66,6 +65,11 @@ export const DiaryPage = () => {
     setViewMode('none');
   };
 
+  const selectedDiary = useMemo(() => {
+    const selectedStr = format(selectedDate, 'yyyy-MM-dd');
+    return diaryData.find((entry) => entry.createdAt === selectedStr);
+  }, [diaryData, selectedDate]);
+
   return (
     <div
       className="flex min-h-screen flex-col bg-cover bg-fixed bg-no-repeat lg:flex-row lg:items-start lg:justify-between"
@@ -82,7 +86,9 @@ export const DiaryPage = () => {
       {/* 일기 작성 or 보기 영역 */}
       <div className="flex w-full justify-center pt-5 lg:w-1/2 lg:pt-10">
         {viewMode === 'editor' && <DiaryEditor date={selectedDate} onClose={handleClose} />}
-        {viewMode === 'viewer' && <DiaryViewer date={selectedDate} onClose={handleClose} />}
+        {viewMode === 'viewer' && selectedDiary && (
+          <DiaryViewer diaryId={selectedDiary.diaryId} date={selectedDate} onClose={handleClose} />
+        )}
       </div>
     </div>
   );

@@ -36,7 +36,49 @@
   pointer-events: none;
 }
 
-/* 생략된 angry, excited 클래스도 동일한 방식으로 정의 */
+.my-angry-class::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Angry.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.my-excited-class::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Excited.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-neutral-class::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Neutral.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
 
 @media screen and (max-width: 1024px) {
   .my-happy-class::after,
