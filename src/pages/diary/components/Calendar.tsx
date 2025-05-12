@@ -6,11 +6,11 @@ import '@pages/diary/styles/monthEmotions.css';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
-interface CalendarProps {
+type CalendarProps = {
   selected: Date | undefined;
   onDayClick: (date: Date) => void;
   diaryDates: Record<string, string>;
-}
+};
 
 export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) => {
   const today = useMemo(() => {
@@ -26,13 +26,27 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
       .filter(([, value]) => value === emotion)
       .map(([dateStr]) => new Date(dateStr));
 
+  const selectDay = (date: Date | undefined) => {
+    if (!date) return;
+
+    const selectedStr = format(selected ?? new Date(0), 'yyyy-MM-dd');
+    const clickedStr = format(date, 'yyyy-MM-dd');
+
+    if (selectedStr === clickedStr) {
+      onDayClick(date);
+      return;
+    }
+
+    onDayClick(date);
+  };
+
   return (
     <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
       <DayPicker
         mode="single"
         required
         selected={selected}
-        onDayClick={onDayClick}
+        onSelect={selectDay}
         disabled={(date) => {
           const dateStr = format(date, 'yyyy-MM-dd');
           const isToday = date.toDateString() === today.toDateString();
