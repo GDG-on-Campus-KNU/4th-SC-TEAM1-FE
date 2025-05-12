@@ -1,8 +1,15 @@
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { createComment, deleteComment, fetchComments, updateComment } from '../apis/commentsApi';
+import {
+  createComment,
+  deleteComment,
+  fetchComments,
+  revealCommentAuthor,
+  updateComment,
+} from '../apis/commentsApi';
 
 type CommentSectionProps = {
   diaryId: number;
@@ -65,7 +72,24 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
     },
   });
 
-  if (isLoading) return <p className="text-sm text-gray-500">댓글을 불러오는 중이에요...</p>;
+  const revealMutation = useMutation({
+    mutationFn: (id: number) => revealCommentAuthor(id),
+    onSuccess: () => {
+      toast.success('2포인트를 사용하였습니다.');
+      queryClient.invalidateQueries({ queryKey: ['comments', diaryId] });
+    },
+    onError: () => {
+      toast.error('남은 포인트를 확인해주세요');
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-10">
+        <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   const sortedComments = [...(data?.content ?? [])].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -122,24 +146,34 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
               ) : (
                 <>
                   <p className="whitespace-pre-wrap text-sm text-gray-800">{comment.content}</p>
-                  {comment.isWriter && (
-                    <div className="mt-2 flex gap-3 text-xs">
+                  <div className="mt-2 flex gap-3 text-xs">
+                    {comment.isWriter && (
+                      <>
+                        <button
+                          onClick={() =>
+                            setEditingMap((prev) => ({ ...prev, [comment.id]: comment.content }))
+                          }
+                          className="text-primary hover:underline"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => deleteMutation.mutate(comment.id)}
+                          className="text-red-500 hover:underline"
+                        >
+                          삭제
+                        </button>
+                      </>
+                    )}
+                    {comment.isAnonymous && (
                       <button
-                        onClick={() =>
-                          setEditingMap((prev) => ({ ...prev, [comment.id]: comment.content }))
-                        }
-                        className="text-primary hover:underline"
+                        onClick={() => revealMutation.mutate(comment.id)}
+                        className="text-blue-500 hover:underline"
                       >
-                        수정
+                        닉네임 열람 (2P 소모)
                       </button>
-                      <button
-                        onClick={() => deleteMutation.mutate(comment.id)}
-                        className="text-red-500 hover:underline"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </>
               )}
             </div>

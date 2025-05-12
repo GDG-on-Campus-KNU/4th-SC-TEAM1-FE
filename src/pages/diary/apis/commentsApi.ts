@@ -5,7 +5,7 @@ export const fetchComments = async (
   diaryId: number,
   page = 0,
   size = 5,
-  sort = 'createdAt,desc',
+  sort = 'createdAt,asc',
 ) => {
   try {
     const res = await axiosInstance.get(`/comments/${diaryId}`, {
@@ -42,5 +42,14 @@ export const deleteComment = async (commentId: number) => {
   } catch (err) {
     handleAxiosError(err);
     throw err;
+  }
+};
+
+export const revealCommentAuthor = async (commentId: number): Promise<void> => {
+  try {
+    await axiosInstance.post(`/comments/reveal/${commentId}`);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
   }
 };
