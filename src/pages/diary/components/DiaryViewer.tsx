@@ -19,6 +19,8 @@ type DiaryViewerProps = {
 export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerProps) => {
   const [diary, setDiary] = useState<DiaryDetail | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isReadyToRender, setIsReadyToRender] = useState(false);
+  const [startTime] = useState(() => performance.now());
 
   const displayDate = date.toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -31,19 +33,30 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
     const loadDiary = async () => {
       try {
         const detail = await fetchDiaryDetail(diaryId);
-        setDiary(detail ?? null);
+        const elapsed = performance.now() - startTime;
+        const delay = Math.max(1000 - elapsed, 0);
+
+        setTimeout(() => {
+          setDiary(detail ?? null);
+          setIsReadyToRender(true);
+        }, delay);
       } catch {
         toast.error('일기 데이터를 불러오지 못했어요.');
         onClose();
       }
     };
     loadDiary();
-  }, [diaryId, onClose]);
+  }, [diaryId, onClose, startTime]);
 
-  if (!diary) {
+  if (!diary || !isReadyToRender) {
     return (
-      <div className="mx-auto w-full max-w-xl rounded-xl bg-white px-6 py-6 text-center text-sm text-gray-600 shadow-md">
-        일기 내용을 불러오는 중입니다...
+      <div className="mx-auto w-full max-w-xl rounded-xl bg-white px-6 py-8 text-center shadow-md">
+        <div className="mb-3 text-sm text-gray-700">기억을 꺼내는 중이에요...</div>
+        <div className="flex justify-center space-x-2">
+          <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-primary"></span>
+          <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-primary [animation-delay:.15s]"></span>
+          <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-primary [animation-delay:.3s]"></span>
+        </div>
       </div>
     );
   }
@@ -62,7 +75,7 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
 
   return (
     <div className="relative mx-auto w-full max-w-xl rounded-2xl bg-white px-6 pb-8 pt-6 shadow-md sm:max-w-sm lg:max-w-xl">
-      {/* 닫기 버튼 (위에서 조금 아래로 이동) */}
+      {/* 닫기 버튼 */}
       <button
         onClick={onClose}
         className="absolute right-4 top-6 z-10 text-gray-400 transition hover:scale-110 hover:text-gray-600"
