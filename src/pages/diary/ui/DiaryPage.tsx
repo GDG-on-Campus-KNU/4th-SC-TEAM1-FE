@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -11,6 +13,7 @@ export const DiaryPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'editor' | 'viewer' | 'none'>('none');
 
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const today = useMemo(() => {
@@ -22,15 +25,26 @@ export const DiaryPage = () => {
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
 
-  const { data: diaryData = [] } = useQuery({
+  const {
+    data: diaryData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['monthlyDiaries', year, month],
     queryFn: () => fetchMonthlyDiaries(year, month),
     staleTime: 1000 * 60 * 5,
   });
 
+  useEffect(() => {
+    if (isError) {
+      toast.error('세션이 만료되었어요. 다시 로그인해주세요.');
+      navigate('/', { replace: true });
+    }
+  }, [isError, navigate]);
+
   const diaryDates: Record<string, string> = useMemo(() => {
     const map: Record<string, string> = {};
-    diaryData.forEach(({ createdAt, emotion }) => {
+    diaryData?.forEach(({ createdAt, emotion }) => {
       map[createdAt] = emotion;
     });
     return map;
@@ -38,11 +52,11 @@ export const DiaryPage = () => {
 
   const selectedDiary = useMemo(() => {
     const selectedStr = format(selectedDate, 'yyyy-MM-dd');
-    return diaryData.find((entry) => entry.createdAt === selectedStr);
+    return diaryData?.find((entry) => entry.createdAt === selectedStr);
   }, [diaryData, selectedDate]);
 
   useEffect(() => {
-    if (diaryData.length === 0) return;
+    if (!diaryData || diaryData.length === 0) return;
 
     const todayStr = format(today, 'yyyy-MM-dd');
     const hasDiaryToday = diaryData.some((entry) => entry.createdAt === todayStr);
@@ -87,6 +101,14 @@ export const DiaryPage = () => {
   const closeDiary = () => {
     setViewMode('none');
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white text-gray-500">
+        불러오는 중입니다...
+      </div>
+    );
+  }
 
   return (
     <div
