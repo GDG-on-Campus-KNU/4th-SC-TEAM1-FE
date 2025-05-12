@@ -7,6 +7,7 @@ import remarkBreaks from 'remark-breaks';
 
 import { deleteDiary, fetchDiaryDetail } from '../apis';
 import type { DiaryDetail } from '../types';
+import { CommentSection } from './CommentSection';
 import { DiaryEditor } from './DiaryEditor';
 
 const emotionLabels: Record<string, string> = {
@@ -166,6 +167,7 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
           </button>
         </div>
       )}
+      <CommentSection diaryId={diary.diaryId} />
     </div>
   );
 };
