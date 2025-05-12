@@ -126,7 +126,7 @@ export const DiaryPage = () => {
   if (!showPage || isLoading) {
     return (
       <div
-        className="flex min-h-screen flex-col items-center justify-center bg-cover bg-fixed bg-no-repeat"
+        className="flex flex-col items-center justify-center bg-cover bg-fixed bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
         style={{
           backgroundImage: `url(${Background})`,
           backgroundPosition: 'bottom center',
@@ -151,7 +151,7 @@ export const DiaryPage = () => {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-cover bg-fixed bg-no-repeat lg:flex-row lg:items-start lg:justify-between"
+      className="flex flex-col bg-cover bg-fixed bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)] lg:flex-row lg:items-start lg:justify-between"
       style={{
         backgroundImage: `url(${Background})`,
         backgroundPosition: 'bottom center',
