@@ -1,0 +1,104 @@
+.rdp-day {
+  position: relative;
+  font-weight: 500;
+  color: gray;
+  z-index: 1;
+}
+
+.my-happy-class,
+.my-sad-class,
+.my-angry-class,
+.my-excited-class,
+.my-neutral-class {
+  position: relative;
+}
+
+.my-happy-class::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Happy.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-sad-class::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Sad.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-angry-class::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Angry.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.my-excited-class::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Excited.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.my-neutral-class::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  background-image: url('/src/pages/diary/assets/Emotion_Neutral.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+@media screen and (max-width: 1024px) {
+  .my-happy-class::after,
+  .my-sad-class::after,
+  .my-angry-class::after,
+  .my-excited-class::after,
+  .my-neutral-class::after {
+    width: 44px;
+    height: 44px;
+  }
+}

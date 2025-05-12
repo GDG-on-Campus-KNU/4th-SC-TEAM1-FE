@@ -1,13 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
 import { Listbox } from '@headlessui/react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Check, ChevronsUpDown, HelpCircle, ImagePlus } from 'lucide-react';
+import remarkBreaks from 'remark-breaks';
 
-type Props = {
-  date: Date;
-  onClose: () => void;
-};
+import {
+  createDiary,
+  fetchDiaryDetail,
+  generateStorageUUID,
+  updateDiary,
+  uploadImage,
+} from '../apis';
+import type { DiaryDetail } from '../types';
 
 const emotions = [
   { name: 'HAPPY', emoji: '😊' },
@@ -15,15 +23,140 @@ const emotions = [
   { name: 'ANGRY', emoji: '😡' },
   { name: 'EXCITED', emoji: '😆' },
   { name: 'NEUTRAL', emoji: '😐' },
-];
+] as const;
 
-export const DiaryEditor = ({ date, onClose }: Props) => {
-  const [markdown, setMarkdown] = useState('');
-  const [selectedEmotion, setSelectedEmotion] = useState(emotions[0]);
+export type EmotionType = (typeof emotions)[number]['name'];
+
+type FormValues = {
+  content: string;
+  emotion: EmotionType;
+};
+
+type Props = {
+  mode: 'create' | 'edit';
+  date: Date;
+  onClose: () => void;
+  onSwitchToViewer?: (updatedDiary: DiaryDetail & { date: Date }) => void;
+  diaryId?: number;
+  defaultContent?: string;
+  defaultEmotion?: EmotionType;
+  storageUUID?: string;
+};
+
+export const DiaryEditor = ({
+  mode,
+  date,
+  onClose,
+  onSwitchToViewer,
+  diaryId,
+  defaultContent = '',
+  defaultEmotion = 'HAPPY',
+  storageUUID: passedUUID,
+}: Props) => {
+  const [storageUUID, setStorageUUID] = useState<string | null>(passedUUID ?? null);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    defaultValues: {
+      emotion: defaultEmotion,
+      content: defaultContent,
+    },
+    mode: 'onChange',
+  });
+
+  const content = watch('content');
+  const emotionValue = watch('emotion');
+  const selectedEmotion = emotions.find((e) => e.name === emotionValue) ?? emotions[0];
+
+  useEffect(() => {
+    if (mode === 'create' && !storageUUID) {
+      const initUUID = async () => {
+        try {
+          const uuid = await generateStorageUUID();
+          setStorageUUID(uuid);
+        } catch {
+          toast.error('스토리지를 초기화하지 못했어요. 다시 시도해 주세요.');
+        }
+      };
+      initUUID();
+    }
+  }, [mode, storageUUID]);
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      if (mode === 'create') {
+        if (!storageUUID) {
+          toast.error('스토리지 UUID를 불러오는 중입니다. 잠시만 기다려 주세요.');
+          return;
+        }
+        await createDiary({ ...data, storageUUID });
+        toast.success('일기가 저장되었어요!');
+        onClose();
+      } else {
+        if (!diaryId) {
+          toast.error('잘못된 접근입니다. diaryId가 필요해요.');
+          return;
+        }
+        await updateDiary(diaryId, {
+          content: data.content,
+          emotion: data.emotion,
+        });
+        toast.success('일기가 수정되었어요!');
+
+        const updatedDiary = await fetchDiaryDetail(diaryId);
+        if (updatedDiary) {
+          onSwitchToViewer?.({ ...updatedDiary, date: new Date(updatedDiary.createdAt) });
+        } else {
+          toast.error('업데이트된 일기를 불러오지 못했어요.');
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['monthlyDiaries', year, month] });
+    } catch {
+      toast.error('저장 중 문제가 발생했어요. 다시 시도해 주세요.');
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !storageUUID) {
+      toast.error('스토리지가 아직 준비되지 않았어요. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('storageUUID', storageUUID);
+
+    try {
+      const response = await uploadImage(formData);
+      const rawUrl = response?.url;
+
+      if (rawUrl) {
+        const encodedPath = encodeURI(rawUrl);
+        const fullUrl = `https://www.todak.site${encodedPath}`;
+        const markdownImage = `\n\n![사진](${fullUrl})`;
+
+        setValue('content', `${content}${markdownImage}`, { shouldValidate: true });
+        toast.success('이미지가 삽입되었어요!');
+      }
+    } catch {
+      toast.error('이미지 업로드에 실패했어요.');
+    }
+  };
 
   return (
     <div className="relative mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
-      {/* 닫기 버튼 */}
       <button
         onClick={onClose}
         className="absolute right-3 top-3 z-10 text-lg text-gray-400 transition hover:scale-110 hover:text-gray-600"
@@ -31,14 +164,12 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         ✕
       </button>
 
-      <h2 className="mb-4 text-lg font-semibold text-primary">
-        {date.toLocaleDateString()}의 일기
-      </h2>
+      <h2 className="mb-4 text-lg font-semibold text-primary">{date.toLocaleDateString()} 일기</h2>
 
-      {/* 감정 입력 */}
+      {/* 감정 선택 */}
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-gray-700">오늘의 감정</label>
-        <Listbox value={selectedEmotion} onChange={setSelectedEmotion}>
+        <Listbox value={selectedEmotion} onChange={(emotion) => setValue('emotion', emotion.name)}>
           <div className="relative">
             <Listbox.Button className="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-left text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary">
               <span>
@@ -72,26 +203,76 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         </Listbox>
       </div>
 
-      {/* 내용 입력 (Markdown) */}
+      {/* 내용 입력 + 이미지 업로드 */}
       <div className="mb-4">
-        <label className="mb-1 block text-sm font-medium text-gray-700">
-          일기 내용 (Markdown 지원)
-        </label>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="flex items-center gap-1 text-sm font-medium text-gray-700">
+            일기 내용 (Markdown 지원)
+            <button
+              type="button"
+              onClick={() => setShowTooltip(!showTooltip)}
+              className="text-gray-400 hover:text-primary"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+          </label>
+          <button
+            type="button"
+            className="text-sm text-primary hover:underline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <ImagePlus className="mr-1 inline-block h-4 w-4" /> 이미지 삽입
+          </button>
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleImageUpload}
+        />
+
+        {showTooltip && (
+          <div className="mb-2 rounded-lg border border-primary/30 bg-green-50 p-4 text-sm text-gray-700 shadow-sm">
+            <p className="mb-2 font-semibold text-primary">✨ 마크다운 문법 도움말</p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>
+                <code>#</code>, <code>##</code> : 제목1, 제목2
+              </li>
+              <li>
+                <code>-</code>, <code>*</code> : 리스트
+              </li>
+              <li>
+                <code>**굵게**</code>, <code>*기울임*</code> : 텍스트 강조
+              </li>
+              <li>
+                <code>---</code> : 구분선
+              </li>
+              <li>엔터 두 번: 줄 바꿈</li>
+              <li>
+                오른쪽 상단의 이미지 삽입 버튼을 이용하면, 마크다운 이미지 문법이 자동으로 마지막
+                줄에 추가됩니다.
+              </li>
+            </ul>
+          </div>
+        )}
         <textarea
-          rows={20}
+          rows={18}
           placeholder="오늘 있었던 일을 Markdown 형식으로 적어보세요."
           className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          value={markdown}
-          onChange={(e) => setMarkdown(e.target.value)}
+          {...register('content', { required: '내용을 입력해주세요.' })}
         />
+        {errors.content && <p className="mt-1 text-sm text-red-500">{errors.content.message}</p>}
       </div>
 
       {/* 미리보기 */}
-      {markdown.trim() !== '' && (
+      {content.trim() !== '' && (
         <div className="mb-4 rounded-md border bg-gray-50 p-4 text-sm">
           <p className="mb-2 font-semibold text-gray-700">미리보기</p>
           <div className="space-y-2 leading-relaxed text-gray-800">
             <ReactMarkdown
+              remarkPlugins={[remarkBreaks]}
               components={{
                 h1: ({ ...props }) => <h1 className="text-xl font-bold" {...props} />,
                 h2: ({ ...props }) => <h2 className="text-lg font-semibold" {...props} />,
@@ -100,15 +281,18 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
                 li: ({ ...props }) => <li className="ml-4 list-disc text-sm" {...props} />,
               }}
             >
-              {markdown}
+              {content}
             </ReactMarkdown>
           </div>
         </div>
       )}
 
-      {/* 저장 버튼 */}
-      <button className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90">
-        저장하기
+      <button
+        onClick={handleSubmit(onSubmit)}
+        disabled={!isValid}
+        className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/40"
+      >
+        {mode === 'create' ? '저장하기' : '수정하기'}
       </button>
     </div>
   );
