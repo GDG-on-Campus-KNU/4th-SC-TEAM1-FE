@@ -38,7 +38,7 @@
 
 /* 생략된 angry, excited 클래스도 동일한 방식으로 정의 */
 
-@media screen and (max-width: 640px) {
+@media screen and (max-width: 1024px) {
   .my-happy-class::after,
   .my-sad-class::after,
   .my-angry-class::after,

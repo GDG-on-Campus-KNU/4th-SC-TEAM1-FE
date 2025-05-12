@@ -1,5 +1,5 @@
 export type DiarySummary = {
   diaryId: number;
-  createdAt: string; // e.g. "2025-05-09"
+  createdAt: string;
   emotion: 'HAPPY' | 'SAD' | 'ANGRY' | 'EXCITED' | 'NEUTRAL';
 };
