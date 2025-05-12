@@ -30,6 +30,7 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
     <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
       <DayPicker
         mode="single"
+        required
         selected={selected}
         onDayClick={onDayClick}
         disabled={(date) => {

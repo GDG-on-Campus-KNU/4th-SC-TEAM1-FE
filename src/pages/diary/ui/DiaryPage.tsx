@@ -51,12 +51,13 @@ export const DiaryPage = () => {
     const isToday = dateStr === todayStr;
 
     if (diaryDates[dateStr]) {
-      setSelectedDate(date);
+      setSelectedDate(date); // 이 줄은 의미상 유지
       setViewMode('viewer');
     } else if (isToday) {
       setSelectedDate(date);
       setViewMode('editor');
     } else {
+      setSelectedDate(date); // 📌 선택은 유지해야 함
       setViewMode('none');
     }
   };
