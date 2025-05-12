@@ -136,7 +136,7 @@ export const DiaryEditor = ({
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('storageUUID', storageUUID);
+    formData.append('storageUUID', String(storageUUID));
 
     try {
       const response = await uploadImage(formData);
