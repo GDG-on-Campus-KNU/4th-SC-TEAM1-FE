@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
@@ -19,20 +20,40 @@ const emotions = [
 
 type EmotionType = (typeof emotions)[number]['name'];
 
+type FormValues = {
+  content: string;
+  emotion: EmotionType;
+};
+
 type Props = {
   date: Date;
   onClose: () => void;
 };
 
 export const DiaryEditor = ({ date, onClose }: Props) => {
-  const [markdown, setMarkdown] = useState('');
-  const [selectedEmotion, setSelectedEmotion] = useState(emotions[0]);
   const [storageUUID, setStorageUUID] = useState<string | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
 
   const queryClient = useQueryClient();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
+
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    defaultValues: {
+      emotion: 'HAPPY',
+      content: '',
+    },
+    mode: 'onChange',
+  });
+
+  const content = watch('content');
+  const selectedEmotion = emotions.find((e) => e.name === watch('emotion'))!;
 
   useEffect(() => {
     const initUUID = async () => {
@@ -46,7 +67,7 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
     initUUID();
   }, []);
 
-  const handleSave = async () => {
+  const onSubmit = async (data: FormValues) => {
     if (!storageUUID) {
       toast.error('스토리지 UUID를 불러오는 중입니다. 잠시만 기다려 주세요.');
       return;
@@ -54,8 +75,8 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
 
     try {
       await createDiary({
-        content: markdown,
-        emotion: selectedEmotion.name as EmotionType,
+        content: data.content,
+        emotion: data.emotion,
         storageUUID,
       });
       toast.success('일기가 저장되었어요!');
@@ -77,9 +98,10 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
 
       <h2 className="mb-4 text-lg font-semibold text-primary">{date.toLocaleDateString()} 일기</h2>
 
+      {/* 감정 선택 */}
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-gray-700">오늘의 감정</label>
-        <Listbox value={selectedEmotion} onChange={setSelectedEmotion}>
+        <Listbox value={selectedEmotion} onChange={(emotion) => setValue('emotion', emotion.name)}>
           <div className="relative">
             <Listbox.Button className="w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-left text-sm shadow-sm transition focus:outline-none focus:ring-2 focus:ring-primary">
               <span>
@@ -113,6 +135,7 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
         </Listbox>
       </div>
 
+      {/* 내용 입력 */}
       <div className="mb-4">
         <label className="mb-1 flex items-center gap-1 text-sm font-medium text-gray-700">
           일기 내용 (Markdown 지원)
@@ -148,12 +171,13 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
           rows={18}
           placeholder="오늘 있었던 일을 Markdown 형식으로 적어보세요."
           className="w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          value={markdown}
-          onChange={(e) => setMarkdown(e.target.value)}
+          {...register('content', { required: '내용을 입력해주세요.' })}
         />
+        {errors.content && <p className="mt-1 text-sm text-red-500">{errors.content.message}</p>}
       </div>
 
-      {markdown.trim() !== '' && (
+      {/* 마크다운 미리보기 */}
+      {content.trim() !== '' && (
         <div className="mb-4 rounded-md border bg-gray-50 p-4 text-sm">
           <p className="mb-2 font-semibold text-gray-700">미리보기</p>
           <div className="space-y-2 leading-relaxed text-gray-800">
@@ -167,15 +191,17 @@ export const DiaryEditor = ({ date, onClose }: Props) => {
                 li: ({ ...props }) => <li className="ml-4 list-disc text-sm" {...props} />,
               }}
             >
-              {markdown}
+              {content}
             </ReactMarkdown>
           </div>
         </div>
       )}
 
+      {/* 저장 버튼 */}
       <button
-        onClick={handleSave}
-        className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90"
+        onClick={handleSubmit(onSubmit)}
+        disabled={!isValid}
+        className="w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/40"
       >
         저장하기
       </button>
