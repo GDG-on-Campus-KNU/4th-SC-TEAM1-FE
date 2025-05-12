@@ -71,3 +71,17 @@ export const updateDiary = async (
     throw error;
   }
 };
+
+export const uploadImage = async (formData: FormData): Promise<{ url: string }> => {
+  try {
+    const response = await axiosInstance.post('/images/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};

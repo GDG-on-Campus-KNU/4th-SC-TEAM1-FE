@@ -28,6 +28,10 @@ export const handleAxiosError = (error: unknown): never => {
         toast.error(message || '이미 사용 중인 정보예요. 다른 값으로 시도해 주세요.');
         throw new Error(message);
 
+      case 413:
+        toast.error('너무 큰 파일이에요.');
+        throw new Error('요청 데이터(이미지 파일)가 서버에서 허용하는 최대 크기를 초과했습니다.');
+
       case 500:
         toast.error('서버에 문제가 생겼어요 😥 잠시 후 다시 시도해 주세요.');
         throw new Error('서버 오류가 발생했습니다.');

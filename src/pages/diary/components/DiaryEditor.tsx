@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 
 import { Listbox } from '@headlessui/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, ChevronsUpDown, HelpCircle } from 'lucide-react';
+import { Check, ChevronsUpDown, HelpCircle, ImagePlus } from 'lucide-react';
 import remarkBreaks from 'remark-breaks';
 
-import { createDiary, fetchDiaryDetail, generateStorageUUID, updateDiary } from '../apis';
+import {
+  createDiary,
+  fetchDiaryDetail,
+  generateStorageUUID,
+  updateDiary,
+  uploadImage,
+} from '../apis';
 import type { DiaryDetail } from '../types';
 
 const emotions = [
@@ -50,6 +56,7 @@ export const DiaryEditor = ({
   const [storageUUID, setStorageUUID] = useState<string | null>(passedUUID ?? null);
   const [showTooltip, setShowTooltip] = useState(false);
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
 
@@ -120,6 +127,34 @@ export const DiaryEditor = ({
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !storageUUID) {
+      toast.error('스토리지가 아직 준비되지 않았어요. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('storageUUID', storageUUID);
+
+    try {
+      const response = await uploadImage(formData);
+      const rawUrl = response?.url;
+
+      if (rawUrl) {
+        const encodedPath = encodeURI(rawUrl);
+        const fullUrl = `https://www.todak.site${encodedPath}`;
+        const markdownImage = `\n\n![사진](${fullUrl})`;
+
+        setValue('content', `${content}${markdownImage}`, { shouldValidate: true });
+        toast.success('이미지가 삽입되었어요!');
+      }
+    } catch {
+      toast.error('이미지 업로드에 실패했어요.');
+    }
+  };
+
   return (
     <div className="relative mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
       <button
@@ -168,18 +203,36 @@ export const DiaryEditor = ({
         </Listbox>
       </div>
 
-      {/* 내용 입력 */}
+      {/* 내용 입력 + 이미지 업로드 */}
       <div className="mb-4">
-        <label className="mb-1 flex items-center gap-1 text-sm font-medium text-gray-700">
-          일기 내용 (Markdown 지원)
+        <div className="mb-2 flex items-center justify-between">
+          <label className="flex items-center gap-1 text-sm font-medium text-gray-700">
+            일기 내용 (Markdown 지원)
+            <button
+              type="button"
+              onClick={() => setShowTooltip(!showTooltip)}
+              className="text-gray-400 hover:text-primary"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+          </label>
           <button
             type="button"
-            onClick={() => setShowTooltip(!showTooltip)}
-            className="text-gray-400 hover:text-primary"
+            className="text-sm text-primary hover:underline"
+            onClick={() => fileInputRef.current?.click()}
           >
-            <HelpCircle className="h-4 w-4" />
+            <ImagePlus className="mr-1 inline-block h-4 w-4" /> 이미지 삽입
           </button>
-        </label>
+        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleImageUpload}
+        />
+
         {showTooltip && (
           <div className="mb-2 rounded-lg border border-primary/30 bg-green-50 p-4 text-sm text-gray-700 shadow-sm">
             <p className="mb-2 font-semibold text-primary">✨ 마크다운 문법 도움말</p>
@@ -197,6 +250,10 @@ export const DiaryEditor = ({
                 <code>---</code> : 구분선
               </li>
               <li>엔터 두 번: 줄 바꿈</li>
+              <li>
+                오른쪽 상단의 이미지 삽입 버튼을 이용하면, 마크다운 이미지 문법이 자동으로 마지막
+                줄에 추가됩니다.
+              </li>
             </ul>
           </div>
         )}
