@@ -67,7 +67,7 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
         }}
         modifiersClassNames={{
           selected: 'bg-primary text-white font-bold',
-          today: 'text-primary font-semibold border-b-2 border-primary',
+          today: 'font-semibold border-b-2 border-primary',
           happy: 'my-happy-class',
           sad: 'my-sad-class',
           angry: 'my-angry-class',
