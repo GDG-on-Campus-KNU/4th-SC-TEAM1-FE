@@ -127,7 +127,7 @@ export const DiaryPage = () => {
     setViewMode('none');
   }, []);
 
-  if (!showPage || isLoading) {
+  if (!showPage || isLoading || diaryData === undefined) {
     return (
       <div
         className="flex flex-col items-center justify-center bg-cover bg-fixed bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
