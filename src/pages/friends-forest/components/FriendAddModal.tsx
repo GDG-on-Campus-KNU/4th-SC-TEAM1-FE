@@ -19,7 +19,7 @@ export const FriendAddModal = ({ onClose }: FriendAddModalProps) => {
       onClose();
     },
     onError: () => {
-      toast.error('친구 요청에 실패했어요. 아이디를 확인해 주세요.');
+      toast.error('친구 요청 실패! 아이디를 확인해 주세요😞');
     },
   });
 
