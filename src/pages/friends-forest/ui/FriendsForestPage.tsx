@@ -1,19 +1,35 @@
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Inbox, Send, UserPlus } from 'lucide-react';
 
-import { getFriendList } from '../apis/forestApi';
+import { deleteFriendRequest, getFriendList } from '../apis/forestApi';
 import Background from '../assets/forest_background.png';
 import { FriendAddModal, SentRequestModal } from '../components';
+
+type Friend = {
+  friendRequestId: number;
+  friendId: string;
+};
 
 export const FriendsForestPage = () => {
   const [showFriendAddModal, setShowFriendAddModal] = useState(false);
   const [showSentRequestModal, setShowSentRequestModal] = useState(false);
 
-  const { data: friends, isLoading } = useQuery({
+  const queryClient = useQueryClient();
+
+  const { data: friends, isLoading } = useQuery<Friend[]>({
     queryKey: ['friendList'],
     queryFn: getFriendList,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteFriendRequest(id),
+    onSuccess: () => {
+      toast.success('친구가 삭제되었습니다.');
+      queryClient.invalidateQueries({ queryKey: ['friendList'] });
+    },
   });
 
   return (
@@ -72,7 +88,7 @@ export const FriendsForestPage = () => {
                 </div>
               ) : (
                 <ul className="space-y-3">
-                  {friends?.map((friend: { friendRequestId: number; friendId: string }) => (
+                  {friends?.map((friend) => (
                     <li
                       key={friend.friendRequestId}
                       className="flex items-center justify-between rounded-md border px-3 py-2 text-sm text-gray-800 shadow-sm hover:bg-green-50 sm:px-4 sm:py-2.5"
@@ -84,7 +100,17 @@ export const FriendsForestPage = () => {
                         <button className="text-xs text-green-600 hover:underline">
                           🌱 놀러가기
                         </button>
-                        <button className="text-xs text-red-500 hover:underline">삭제</button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm('정말 친구를 삭제하시겠습니까?')) {
+                              deleteMutation.mutate(friend.friendRequestId);
+                            }
+                          }}
+                          disabled={deleteMutation.isPending}
+                          className="text-xs text-red-500 hover:underline"
+                        >
+                          삭제
+                        </button>
                       </div>
                     </li>
                   ))}

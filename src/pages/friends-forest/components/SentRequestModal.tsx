@@ -1,15 +1,33 @@
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getSentFriendRequests } from '../apis/forestApi';
+import { deleteFriendRequest, getSentFriendRequests } from '../apis/forestApi';
+
+type Request = {
+  friendRequestId: number;
+  requesterName: string;
+  accepterName: string;
+  friendStatus: 'PENDING' | 'DECLINED';
+};
 
 export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'DECLINED'>('PENDING');
+  const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<Request[]>({
     queryKey: ['sentFriendRequests'],
     queryFn: getSentFriendRequests,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteFriendRequest(id),
+    onSuccess: () => {
+      const message = activeTab === 'PENDING' ? '요청이 취소되었습니다.' : '요청이 삭제되었습니다.';
+      toast.success(message);
+      queryClient.invalidateQueries({ queryKey: ['sentFriendRequests'] });
+    },
   });
 
   const filteredData = data?.filter((req) => req.friendStatus === activeTab) || [];
@@ -60,6 +78,16 @@ export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
                 >
                   <span className="font-medium">{req.accepterName}</span>
                   <button
+                    onClick={() => {
+                      const confirmMsg =
+                        activeTab === 'PENDING'
+                          ? '정말 요청을 취소하시겠습니까?'
+                          : '정말 지우시겠습니까?';
+                      if (window.confirm(confirmMsg)) {
+                        deleteMutation.mutate(req.friendRequestId);
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
                     className={`text-xs font-medium ${
                       activeTab === 'PENDING'
                         ? 'text-gray-500 hover:text-gray-700'

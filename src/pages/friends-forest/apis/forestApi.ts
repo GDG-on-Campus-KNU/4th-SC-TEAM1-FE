@@ -41,3 +41,12 @@ export const getSentFriendRequests = async (): Promise<SentFriendRequest[]> => {
     throw error;
   }
 };
+
+export const deleteFriendRequest = async (friendRequestId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/friends/${friendRequestId}`);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
