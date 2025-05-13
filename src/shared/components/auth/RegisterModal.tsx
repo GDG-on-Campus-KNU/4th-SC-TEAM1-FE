@@ -78,8 +78,8 @@ export const RegisterModal = ({ onClose, onSwitch }: RegisterModalProps) => {
         nickname: data.nickname,
       });
 
-      toast.success('회원가입이 완료되었습니다!');
-      onClose();
+      toast.success('회원가입 성공! 로그인 창으로 이동합니다😊');
+      onSwitch();
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message || '회원가입에 실패했습니다.');
