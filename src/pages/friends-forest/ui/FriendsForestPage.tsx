@@ -5,10 +5,11 @@ import { Inbox, Send, UserPlus } from 'lucide-react';
 
 import { getFriendList } from '../apis/forestApi';
 import Background from '../assets/forest_background.png';
-import { FriendAddModal } from '../components';
+import { FriendAddModal, SentRequestModal } from '../components';
 
 export const FriendsForestPage = () => {
   const [showFriendAddModal, setShowFriendAddModal] = useState(false);
+  const [showSentRequestModal, setShowSentRequestModal] = useState(false);
 
   const { data: friends, isLoading } = useQuery({
     queryKey: ['friendList'],
@@ -18,6 +19,8 @@ export const FriendsForestPage = () => {
   return (
     <>
       {showFriendAddModal && <FriendAddModal onClose={() => setShowFriendAddModal(false)} />}
+      {showSentRequestModal && <SentRequestModal onClose={() => setShowSentRequestModal(false)} />}
+
       <div
         className="relative flex w-full flex-col bg-cover bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
         style={{
@@ -38,7 +41,10 @@ export const FriendsForestPage = () => {
               >
                 <UserPlus className="h-5 w-5" /> 친구 추가
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-sky-300 bg-sky-50 py-3 text-sky-700 hover:bg-sky-100 sm:gap-1 sm:px-0">
+              <button
+                onClick={() => setShowSentRequestModal(true)}
+                className="flex items-center justify-center gap-2 rounded-lg border border-sky-300 bg-sky-50 py-3 text-sky-700 hover:bg-sky-100 sm:gap-1 sm:px-0"
+              >
                 <Send className="h-5 w-5" /> 보낸 요청
               </button>
               <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 py-3 text-gray-700 hover:bg-gray-100 sm:gap-1 sm:px-0">
@@ -78,7 +84,7 @@ export const FriendsForestPage = () => {
                         <button className="text-xs text-green-600 hover:underline">
                           🌱 놀러가기
                         </button>
-                        <button className="text-xs text-red-500 hover:underline">친구 삭제</button>
+                        <button className="text-xs text-red-500 hover:underline">삭제</button>
                       </div>
                     </li>
                   ))}
