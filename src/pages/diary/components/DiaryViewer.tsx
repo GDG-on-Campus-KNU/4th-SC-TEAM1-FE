@@ -56,7 +56,7 @@ export const DiaryViewer = ({ diaryId, date, onClose, onDeleted }: DiaryViewerPr
         }
 
         setDiary({ ...detail, date: new Date(detail.createdAt) });
-        setTimeout(() => setIsReadyToRender(true), 1000);
+        setTimeout(() => setIsReadyToRender(true), 500);
       } catch {
         toast.error('일기 데이터를 불러오지 못했어요.');
         onClose();

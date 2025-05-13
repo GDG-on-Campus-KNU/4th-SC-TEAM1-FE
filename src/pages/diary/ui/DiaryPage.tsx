@@ -41,7 +41,7 @@ export const DiaryPage = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      const MIN_DELAY = 3000;
+      const MIN_DELAY = 1500;
       const elapsed = performance.now() - startTime;
       const delay = Math.max(MIN_DELAY - elapsed, 0);
 

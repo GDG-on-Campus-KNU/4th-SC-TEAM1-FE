@@ -66,7 +66,7 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
           neutral: getDatesByEmotion('NEUTRAL'),
         }}
         modifiersClassNames={{
-          selected: 'bg-primary text-white font-bold',
+          selected: 'bg-primary font-bold',
           today: 'font-semibold border-b-2 border-primary',
           happy: 'my-happy-class',
           sad: 'my-sad-class',
