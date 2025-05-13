@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
-import { Inbox, Send, UserMinus, UserPlus } from 'lucide-react';
+import { Inbox, Send, UserPlus } from 'lucide-react';
 
 import { getFriendList } from '../apis/forestApi';
 import Background from '../assets/forest_background.png';
@@ -31,20 +31,17 @@ export const FriendsForestPage = () => {
               🌲 이웃숲 친구 관리
             </h1>
 
-            <div className="grid gap-3 text-sm sm:grid-cols-2 sm:gap-4">
+            <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3 sm:gap-2">
               <button
                 onClick={() => setShowFriendAddModal(true)}
-                className="flex items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 py-3 text-emerald-700 hover:bg-emerald-100 sm:px-0"
+                className="flex items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 py-3 text-emerald-700 hover:bg-emerald-100 sm:gap-1 sm:px-0"
               >
                 <UserPlus className="h-5 w-5" /> 친구 추가
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-rose-300 bg-rose-50 py-3 text-rose-700 hover:bg-rose-100 sm:px-0">
-                <UserMinus className="h-5 w-5" /> 친구 삭제
-              </button>
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-sky-300 bg-sky-50 py-3 text-sky-700 hover:bg-sky-100 sm:px-0">
+              <button className="flex items-center justify-center gap-2 rounded-lg border border-sky-300 bg-sky-50 py-3 text-sky-700 hover:bg-sky-100 sm:gap-1 sm:px-0">
                 <Send className="h-5 w-5" /> 보낸 요청
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 py-3 text-gray-700 hover:bg-gray-100 sm:px-0">
+              <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 py-3 text-gray-700 hover:bg-gray-100 sm:gap-1 sm:px-0">
                 <Inbox className="h-5 w-5" /> 받은 요청
               </button>
             </div>
@@ -63,6 +60,10 @@ export const FriendsForestPage = () => {
                   </div>
                   <p className="mt-1 font-medium">숲에서 친구들을 찾고 있어요...</p>
                 </div>
+              ) : friends && friends.length === 0 ? (
+                <div className="text-center text-sm text-gray-500">
+                  친구가 아직 없어요. 친구를 추가해 보세요!
+                </div>
               ) : (
                 <ul className="space-y-3">
                   {friends?.map((friend: { friendRequestId: number; friendId: string }) => (
@@ -73,9 +74,12 @@ export const FriendsForestPage = () => {
                       <div>
                         <span className="font-medium">{friend.friendId}</span>
                       </div>
-                      <button className="text-xs text-green-600 hover:underline">
-                        🌱 놀러가기
-                      </button>
+                      <div className="flex gap-3">
+                        <button className="text-xs text-green-600 hover:underline">
+                          🌱 놀러가기
+                        </button>
+                        <button className="text-xs text-red-500 hover:underline">친구 삭제</button>
+                      </div>
                     </li>
                   ))}
                 </ul>
