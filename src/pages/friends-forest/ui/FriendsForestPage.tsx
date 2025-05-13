@@ -55,7 +55,14 @@ export const FriendsForestPage = () => {
             <h2 className="mb-3 text-center text-lg font-semibold text-green-700">내 친구 목록</h2>
             <div className="min-h-[20vh] overflow-y-auto pr-1 sm:max-h-[35vh] md:max-h-[35vh]">
               {isLoading ? (
-                <p className="text-center text-sm text-gray-500">불러오는 중...</p>
+                <div className="flex flex-col items-center justify-center py-6 text-center text-sm text-green-700">
+                  <div className="mb-2 flex space-x-2">
+                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-emerald-400" />
+                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-emerald-500 [animation-delay:.15s]" />
+                    <span className="h-2.5 w-2.5 animate-bounce rounded-full bg-emerald-600 [animation-delay:.3s]" />
+                  </div>
+                  <p className="mt-1 font-medium">숲에서 친구들을 찾고 있어요...</p>
+                </div>
               ) : (
                 <ul className="space-y-3">
                   {friends?.map((friend: { friendRequestId: number; friendId: string }) => (

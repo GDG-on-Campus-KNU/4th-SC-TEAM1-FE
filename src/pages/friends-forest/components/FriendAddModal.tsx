@@ -18,9 +18,6 @@ export const FriendAddModal = ({ onClose }: FriendAddModalProps) => {
       toast.success('친구 요청을 보냈어요!');
       onClose();
     },
-    onError: () => {
-      toast.error('친구 요청 실패! 아이디를 확인해 주세요😞');
-    },
   });
 
   const submitId = (e: React.FormEvent) => {

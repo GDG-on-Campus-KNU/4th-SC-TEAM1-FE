@@ -17,5 +17,10 @@ export const getFriendList = async (): Promise<Friend[]> => {
 };
 
 export const sendFriendRequest = async (friendId: string): Promise<void> => {
-  await axiosInstance.post('/friends', { friendId });
+  try {
+    await axiosInstance.post('/friends', { friendId });
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
 };
