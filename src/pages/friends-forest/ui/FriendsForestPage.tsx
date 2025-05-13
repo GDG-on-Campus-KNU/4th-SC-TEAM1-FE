@@ -6,7 +6,7 @@ import { Inbox, Send, UserPlus } from 'lucide-react';
 
 import { deleteFriendRequest, getFriendList } from '../apis/forestApi';
 import Background from '../assets/forest_background.png';
-import { FriendAddModal, SentRequestModal } from '../components';
+import { FriendAddModal, ReceivedRequestModal, SentRequestModal } from '../components';
 
 type Friend = {
   friendRequestId: number;
@@ -16,6 +16,7 @@ type Friend = {
 export const FriendsForestPage = () => {
   const [showFriendAddModal, setShowFriendAddModal] = useState(false);
   const [showSentRequestModal, setShowSentRequestModal] = useState(false);
+  const [showReceivedRequestModal, setShowReceivedRequestModal] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -36,6 +37,9 @@ export const FriendsForestPage = () => {
     <>
       {showFriendAddModal && <FriendAddModal onClose={() => setShowFriendAddModal(false)} />}
       {showSentRequestModal && <SentRequestModal onClose={() => setShowSentRequestModal(false)} />}
+      {showReceivedRequestModal && (
+        <ReceivedRequestModal onClose={() => setShowReceivedRequestModal(false)} />
+      )}
 
       <div
         className="relative flex w-full flex-col bg-cover bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
@@ -63,7 +67,10 @@ export const FriendsForestPage = () => {
               >
                 <Send className="h-5 w-5" /> 보낸 요청
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 py-3 text-gray-700 hover:bg-gray-100 sm:gap-1 sm:px-0">
+              <button
+                onClick={() => setShowReceivedRequestModal(true)}
+                className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 py-3 text-gray-700 hover:bg-gray-100 sm:gap-1 sm:px-0"
+              >
                 <Inbox className="h-5 w-5" /> 받은 요청
               </button>
             </div>

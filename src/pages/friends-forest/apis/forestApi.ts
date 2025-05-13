@@ -13,6 +13,8 @@ type SentFriendRequest = {
   friendStatus: 'PENDING' | 'DECLINED';
 };
 
+type ReceivedFriendRequest = SentFriendRequest;
+
 export const getFriendList = async (): Promise<Friend[]> => {
   try {
     const response = await axiosInstance.get('/friends');
@@ -42,9 +44,37 @@ export const getSentFriendRequests = async (): Promise<SentFriendRequest[]> => {
   }
 };
 
+export const getReceivedFriendRequests = async (): Promise<ReceivedFriendRequest[]> => {
+  try {
+    const response = await axiosInstance.get('/friends/accepter');
+    return response.data.data;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
 export const deleteFriendRequest = async (friendRequestId: number): Promise<void> => {
   try {
     await axiosInstance.delete(`/friends/${friendRequestId}`);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const acceptFriendRequest = async (friendRequestId: number): Promise<void> => {
+  try {
+    await axiosInstance.put(`/friends/accept/${friendRequestId}`);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const declineFriendRequest = async (friendRequestId: number): Promise<void> => {
+  try {
+    await axiosInstance.put(`/friends/decline/${friendRequestId}`);
   } catch (error) {
     handleAxiosError(error);
     throw error;
