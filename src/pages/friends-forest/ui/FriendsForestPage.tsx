@@ -31,16 +31,16 @@ export const FriendsForestPage = () => {
           </h1>
 
           <div className="grid gap-3 text-sm sm:grid-cols-2 sm:gap-4">
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-green-800 hover:bg-green-100 sm:px-4 sm:py-3">
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-green-300 bg-green-50 py-3 text-green-800 hover:bg-green-100 sm:px-0">
               <UserPlus className="h-5 w-5" /> 친구 요청 보내기
             </button>
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-3 py-2 text-yellow-800 hover:bg-yellow-100 sm:px-4 sm:py-3">
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 py-3 text-yellow-800 hover:bg-yellow-100 sm:px-0">
               <UserCheck className="h-5 w-5" /> 받은 요청 확인
             </button>
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-red-800 hover:bg-red-100 sm:px-4 sm:py-3">
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-red-300 bg-red-50 py-3 text-red-800 hover:bg-red-100 sm:px-0">
               <UserX className="h-5 w-5" /> 거절한 요청 보기
             </button>
-            <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-700 hover:bg-gray-100 sm:px-4 sm:py-3">
+            <button className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-gray-50 py-3 text-gray-700 hover:bg-gray-100 sm:px-0">
               <UserMinus className="h-5 w-5" /> 친구 삭제하기
             </button>
           </div>
@@ -49,7 +49,7 @@ export const FriendsForestPage = () => {
         {/* 친구 목록 */}
         <div className="w-full max-w-xl rounded-xl bg-white/80 p-4 shadow-md sm:p-5">
           <h2 className="mb-3 text-center text-lg font-semibold text-green-700">내 친구 목록</h2>
-          <div className="max-h-[40vh] overflow-y-auto pr-1 sm:max-h-[30vh] md:max-h-[45vh]">
+          <div className="overflow-y-auto pr-1 sm:max-h-[35vh] md:max-h-[35vh]">
             <ul className="space-y-3">
               {dummyFriends.map((friend) => (
                 <li
