@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { FriendRequestCount } from '../apis/forestApi';
 import {
   acceptFriendRequest,
   declineFriendRequest,
@@ -21,40 +22,131 @@ export const ReceivedRequestModal = ({ onClose }: { onClose: () => void }) => {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'DECLINED'>('PENDING');
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery<ReceivedRequest[]>({
+  const { data: requests = [], isLoading } = useQuery<ReceivedRequest[]>({
     queryKey: ['receivedFriendRequests'],
     queryFn: getReceivedFriendRequests,
   });
 
-  // 요청 수락
-  const acceptMutation = useMutation({
-    mutationFn: (id: number) => acceptFriendRequest(id),
+  const acceptMutation = useMutation<
+    void,
+    Error,
+    number,
+    { previousCounts?: FriendRequestCount[] }
+  >({
+    mutationFn: (id) => acceptFriendRequest(id),
+    onMutate: async (id) => {
+      void id;
+      await queryClient.cancelQueries({ queryKey: ['friendRequestCounts'] });
+      const previousCounts = queryClient.getQueryData<FriendRequestCount[]>([
+        'friendRequestCounts',
+      ]);
+      queryClient.setQueryData<FriendRequestCount[]>(
+        ['friendRequestCounts'],
+        (old) =>
+          old?.map((c) => {
+            if (c.friendStatus === 'PENDING' && c.info === 'Accepter') {
+              return { ...c, count: c.count - 1 };
+            }
+            if (c.friendStatus === 'ACCEPTED') {
+              return { ...c, count: c.count + 1 };
+            }
+            return c;
+          }) ?? [],
+      );
+      return { previousCounts };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousCounts) {
+        queryClient.setQueryData(['friendRequestCounts'], context.previousCounts);
+      }
+    },
     onSuccess: () => {
       toast.success('친구 요청을 수락했습니다.');
-      queryClient.invalidateQueries({ queryKey: ['receivedFriendRequests'] });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequestCounts'] });
       queryClient.invalidateQueries({ queryKey: ['friendList'] });
+      queryClient.invalidateQueries({ queryKey: ['receivedFriendRequests'] });
     },
   });
 
-  // 요청 거절
-  const declineMutation = useMutation({
-    mutationFn: (id: number) => declineFriendRequest(id),
+  const declineMutation = useMutation<
+    void,
+    Error,
+    number,
+    { previousCounts?: FriendRequestCount[] }
+  >({
+    mutationFn: (id) => declineFriendRequest(id),
+    onMutate: async (id) => {
+      void id;
+      await queryClient.cancelQueries({ queryKey: ['friendRequestCounts'] });
+      const previousCounts = queryClient.getQueryData<FriendRequestCount[]>([
+        'friendRequestCounts',
+      ]);
+      queryClient.setQueryData<FriendRequestCount[]>(
+        ['friendRequestCounts'],
+        (old) =>
+          old?.map((c) =>
+            c.friendStatus === 'PENDING' && c.info === 'Accepter'
+              ? { ...c, count: c.count - 1 }
+              : c,
+          ) ?? [],
+      );
+      return { previousCounts };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousCounts) {
+        queryClient.setQueryData(['friendRequestCounts'], context.previousCounts);
+      }
+    },
     onSuccess: () => {
       toast.success('친구 요청을 거절했습니다.');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequestCounts'] });
       queryClient.invalidateQueries({ queryKey: ['receivedFriendRequests'] });
     },
   });
 
-  // 거절된 요청 삭제
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteFriendRequest(id),
+  const deleteMutation = useMutation<
+    void,
+    Error,
+    number,
+    { previousCounts?: FriendRequestCount[] }
+  >({
+    mutationFn: (id) => deleteFriendRequest(id),
+    onMutate: async (id) => {
+      void id;
+      await queryClient.cancelQueries({ queryKey: ['friendRequestCounts'] });
+      const previousCounts = queryClient.getQueryData<FriendRequestCount[]>([
+        'friendRequestCounts',
+      ]);
+      queryClient.setQueryData<FriendRequestCount[]>(
+        ['friendRequestCounts'],
+        (old) =>
+          old?.map((c) =>
+            c.friendStatus === 'DECLINED' && c.info === 'Accepter'
+              ? { ...c, count: c.count - 1 }
+              : c,
+          ) ?? [],
+      );
+      return { previousCounts };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousCounts) {
+        queryClient.setQueryData(['friendRequestCounts'], context.previousCounts);
+      }
+    },
     onSuccess: () => {
-      toast.success('요청이 삭제되었습니다.');
+      toast.success('요청을 삭제했습니다.');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequestCounts'] });
       queryClient.invalidateQueries({ queryKey: ['receivedFriendRequests'] });
     },
   });
 
-  const filtered = data?.filter((req) => req.friendStatus === activeTab) ?? [];
+  const filtered = requests.filter((req) => req.friendStatus === activeTab);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-2">

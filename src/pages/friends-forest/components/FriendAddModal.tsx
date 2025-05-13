@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import type { FriendRequestCount } from '../apis/forestApi';
 import { sendFriendRequest } from '../apis/forestApi';
 
 type FriendAddModalProps = {
@@ -11,12 +12,38 @@ type FriendAddModalProps = {
 
 export const FriendAddModal = ({ onClose }: FriendAddModalProps) => {
   const [friendId, setFriendId] = useState('');
+  const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const mutation = useMutation<void, Error, void, { previousCounts?: FriendRequestCount[] }>({
     mutationFn: () => sendFriendRequest(friendId),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['friendRequestCounts'] });
+      const previousCounts = queryClient.getQueryData<FriendRequestCount[]>([
+        'friendRequestCounts',
+      ]);
+      queryClient.setQueryData<FriendRequestCount[]>(
+        ['friendRequestCounts'],
+        (old) =>
+          old?.map((c) =>
+            c.friendStatus === 'PENDING' && c.info === 'Requester'
+              ? { ...c, count: c.count + 1 }
+              : c,
+          ) ?? [],
+      );
+      return { previousCounts };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previousCounts) {
+        queryClient.setQueryData(['friendRequestCounts'], context.previousCounts);
+      }
+    },
     onSuccess: () => {
       toast.success('친구 요청을 보냈어요!');
       onClose();
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequestCounts'] });
+      queryClient.invalidateQueries({ queryKey: ['sentFriendRequests'] });
     },
   });
 

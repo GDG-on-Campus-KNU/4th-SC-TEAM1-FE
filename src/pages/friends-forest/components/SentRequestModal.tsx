@@ -3,9 +3,10 @@ import { toast } from 'react-hot-toast';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { FriendRequestCount } from '../apis/forestApi';
 import { deleteFriendRequest, getSentFriendRequests } from '../apis/forestApi';
 
-type Request = {
+type SentRequest = {
   friendRequestId: number;
   requesterName: string;
   accepterName: string;
@@ -16,21 +17,50 @@ export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'DECLINED'>('PENDING');
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery<Request[]>({
+  const { data: requests = [], isLoading } = useQuery<SentRequest[]>({
     queryKey: ['sentFriendRequests'],
     queryFn: getSentFriendRequests,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => deleteFriendRequest(id),
+  const deleteMutation = useMutation<
+    void,
+    Error,
+    number,
+    { previousCounts?: FriendRequestCount[] }
+  >({
+    mutationFn: (id) => deleteFriendRequest(id),
+    onMutate: async (id) => {
+      void id;
+      await queryClient.cancelQueries({ queryKey: ['friendRequestCounts'] });
+      const previousCounts = queryClient.getQueryData<FriendRequestCount[]>([
+        'friendRequestCounts',
+      ]);
+      queryClient.setQueryData<FriendRequestCount[]>(
+        ['friendRequestCounts'],
+        (old) =>
+          old?.map((c) =>
+            c.friendStatus === 'PENDING' && c.info === 'Requester'
+              ? { ...c, count: c.count - 1 }
+              : c,
+          ) ?? [],
+      );
+      return { previousCounts };
+    },
+    onError: (_error, _id, context) => {
+      if (context?.previousCounts) {
+        queryClient.setQueryData(['friendRequestCounts'], context.previousCounts);
+      }
+    },
     onSuccess: () => {
-      const message = activeTab === 'PENDING' ? '요청이 취소되었습니다.' : '요청이 삭제되었습니다.';
-      toast.success(message);
+      toast.success(activeTab === 'PENDING' ? '요청이 취소되었습니다.' : '요청이 삭제되었습니다.');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['friendRequestCounts'] });
       queryClient.invalidateQueries({ queryKey: ['sentFriendRequests'] });
     },
   });
 
-  const filteredData = data?.filter((req) => req.friendStatus === activeTab) || [];
+  const filtered = requests.filter((r) => r.friendStatus === activeTab);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-2">
@@ -61,32 +91,24 @@ export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <p className="mb-2 text-center text-sm text-gray-600 sm:text-base">
-          {activeTab === 'PENDING' ? '친구가 요청을 대기중이에요' : '친구가 요청을 거절했어요'}
+          {activeTab === 'PENDING' ? '친구 요청이 대기중입니다.' : '친구 요청이 거절되었습니다.'}
         </p>
 
         <div className="max-h-[35vh] min-h-[140px] overflow-y-auto rounded-md border p-2">
           {isLoading ? (
             <p className="text-center text-sm text-gray-500">불러오는 중이에요...</p>
-          ) : filteredData.length === 0 ? (
-            <p className="text-center text-sm text-gray-400">조용한 하루에요 🌿</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-center text-sm text-gray-400">표시할 요청이 없습니다 🌿</p>
           ) : (
             <ul className="space-y-2">
-              {filteredData.map((req) => (
+              {filtered.map((req) => (
                 <li
                   key={req.friendRequestId}
                   className="flex items-center justify-between rounded-md border px-3 py-2 text-sm text-gray-800 shadow-sm hover:bg-green-50"
                 >
                   <span className="font-medium">{req.accepterName}</span>
                   <button
-                    onClick={() => {
-                      const confirmMsg =
-                        activeTab === 'PENDING'
-                          ? '정말 요청을 취소하시겠습니까?'
-                          : '정말 지우시겠습니까?';
-                      if (window.confirm(confirmMsg)) {
-                        deleteMutation.mutate(req.friendRequestId);
-                      }
-                    }}
+                    onClick={() => deleteMutation.mutate(req.friendRequestId)}
                     disabled={deleteMutation.isPending}
                     className={`text-xs font-medium ${
                       activeTab === 'PENDING'
