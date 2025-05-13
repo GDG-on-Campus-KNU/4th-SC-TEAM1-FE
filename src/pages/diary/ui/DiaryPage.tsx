@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,7 +15,7 @@ export const DiaryPage = () => {
   const [viewMode, setViewMode] = useState<'editor' | 'viewer' | 'none'>('none');
 
   const [showPage, setShowPage] = useState(false);
-  const [startTime] = useState(() => performance.now());
+  const startTimeRef = useRef(performance.now());
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -42,7 +42,7 @@ export const DiaryPage = () => {
   useEffect(() => {
     if (!isLoading) {
       const MIN_DELAY = 1500;
-      const elapsed = performance.now() - startTime;
+      const elapsed = performance.now() - startTimeRef.current;
       const delay = Math.max(MIN_DELAY - elapsed, 0);
 
       const timer = setTimeout(() => {
@@ -51,7 +51,7 @@ export const DiaryPage = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, startTime]);
+  }, [isLoading]);
 
   useEffect(() => {
     if (isError) {
@@ -60,7 +60,7 @@ export const DiaryPage = () => {
     }
   }, [isError, navigate]);
 
-  const diaryDates: Record<string, string> = useMemo(() => {
+  const diaryDates = useMemo<Record<string, string>>(() => {
     const map: Record<string, string> = {};
     diaryData?.forEach(({ createdAt, emotion }) => {
       map[createdAt] = emotion;
@@ -69,12 +69,12 @@ export const DiaryPage = () => {
   }, [diaryData]);
 
   const selectedDiary = useMemo(() => {
-    const selectedStr = format(selectedDate, 'yyyy-MM-dd');
-    return diaryData?.find((entry) => entry.createdAt === selectedStr);
+    const key = format(selectedDate, 'yyyy-MM-dd');
+    return diaryData?.find((entry) => entry.createdAt === key);
   }, [diaryData, selectedDate]);
 
   useEffect(() => {
-    if (!diaryData || diaryData.length === 0) return;
+    if (!diaryData) return;
 
     const todayStr = format(today, 'yyyy-MM-dd');
     const hasDiaryToday = diaryData.some((entry) => entry.createdAt === todayStr);
@@ -83,43 +83,49 @@ export const DiaryPage = () => {
     setViewMode(hasDiaryToday ? 'viewer' : 'editor');
   }, [diaryData, today]);
 
-  const clickDay = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const todayStr = format(today, 'yyyy-MM-dd');
-    const isToday = dateStr === todayStr;
+  const clickDay = useCallback(
+    (date: Date) => {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const todayStr = format(today, 'yyyy-MM-dd');
+      const isToday = dateStr === todayStr;
 
-    setSelectedDate(date);
+      setSelectedDate(date);
 
-    if (diaryDates[dateStr]) {
-      setViewMode('none');
-      requestAnimationFrame(() => setViewMode('viewer'));
-    } else if (isToday) {
-      setViewMode('editor');
-    } else {
-      setViewMode('none');
-    }
-  };
+      if (diaryDates[dateStr]) {
+        setViewMode('none');
+        requestAnimationFrame(() => setViewMode('viewer'));
+      } else if (isToday) {
+        setViewMode('editor');
+      } else {
+        setViewMode('none');
+      }
+    },
+    [today, diaryDates],
+  );
 
-  const deleteTheDiary = (deletedDate: Date) => {
-    const todayStr = format(today, 'yyyy-MM-dd');
-    const deletedStr = format(deletedDate, 'yyyy-MM-dd');
-    const isToday = deletedStr === todayStr;
+  const deleteTheDiary = useCallback(
+    (deletedDate: Date) => {
+      queryClient.invalidateQueries({ queryKey: ['monthlyDiaries', year, month] });
 
-    queryClient.invalidateQueries({ queryKey: ['monthlyDiaries', year, month] });
+      const deletedStr = format(deletedDate, 'yyyy-MM-dd');
+      const todayStr = format(today, 'yyyy-MM-dd');
+      const isToday = deletedStr === todayStr;
 
-    if (isToday) {
-      setViewMode('editor');
-    } else {
-      const freshToday = new Date();
-      freshToday.setHours(0, 0, 0, 0);
-      setSelectedDate(freshToday);
-      setViewMode('editor');
-    }
-  };
+      if (isToday) {
+        setViewMode('editor');
+      } else {
+        const fresh = new Date();
+        fresh.setHours(0, 0, 0, 0);
+        setSelectedDate(fresh);
+        setViewMode('editor');
+      }
+    },
+    [queryClient, year, month, today],
+  );
 
-  const closeDiary = () => {
+  const closeDiary = useCallback(() => {
     setViewMode('none');
-  };
+  }, []);
 
   if (!showPage || isLoading) {
     return (
@@ -160,7 +166,7 @@ export const DiaryPage = () => {
         <Calendar selected={selectedDate} onDayClick={clickDay} diaryDates={diaryDates} />
       </div>
 
-      {/* 일기 작성 or 보기 영역 */}
+      {/* 일기 작성·조회 영역 */}
       <div className="flex w-full justify-center pt-5 lg:w-1/2 lg:pt-10">
         {viewMode === 'editor' && (
           <DiaryEditor mode="create" date={selectedDate} onClose={closeDiary} />
