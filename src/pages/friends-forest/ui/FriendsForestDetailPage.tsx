@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { Bookmark } from 'lucide-react';
 
+import { FriendTree } from '../components';
+
 export const FriendsForestDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const [view, setView] = useState<'guestbook' | 'diary' | 'default'>('default');
@@ -15,18 +17,18 @@ export const FriendsForestDetailPage: React.FC = () => {
   const renderContent = () => {
     switch (view) {
       case 'guestbook':
-        return <div className="p-4">✍️ 방명록 작성 화면 (임시)</div>;
+        return <FriendTree />;
       case 'diary':
         return <div className="p-4">📖 일기 보기 화면 (임시)</div>;
       default:
-        return <div className="p-4">🌳 친구의 숲 입구 상세보기 (임시)</div>;
+        return <FriendTree />;
     }
   };
 
   return (
-    <div className="relative flex min-h-screen bg-green-50">
+    <div className="relative flex bg-green-50">
       {/* absolute 로 띄워서 메인 위에 겹치되, 버튼 모양은 그대로 유지 */}
-      <aside className="absolute left-0 top-5 z-10 flex flex-row space-x-2 space-y-0 p-2 md:flex-col md:space-x-0 md:space-y-2 md:pl-0">
+      <aside className="absolute left-1/2 z-10 flex -translate-x-1/2 flex-row justify-between space-x-2 space-y-0 p-2 md:left-0 md:top-5 md:translate-x-0 md:flex-col md:space-x-0 md:space-y-2 md:pl-0">
         {['숲 입구로 돌아가기', '방명록 작성하기', '일기 보기'].map((label, idx) => {
           const onClick =
             idx === 0
@@ -52,7 +54,7 @@ export const FriendsForestDetailPage: React.FC = () => {
 
       {/* 메인 컨텐츠 영역 (사이드바와 겹치도록 ml 제거) */}
       <main
-        className={`flex-1 p-6 transition-opacity delay-150 duration-700 ease-out ${
+        className={`flex-1 p-0 transition-opacity delay-150 duration-700 ease-out ${
           mounted ? 'opacity-100' : 'opacity-0'
         }`}
       >

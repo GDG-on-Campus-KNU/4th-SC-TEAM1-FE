@@ -21,6 +21,11 @@ export type FriendRequestCount = {
   count: number;
 };
 
+export type FriendTreeStatus = {
+  level: number;
+  experience: number;
+};
+
 export const getFriendList = async (): Promise<Friend[]> => {
   try {
     const response = await axiosInstance.get('/friends');
@@ -91,6 +96,16 @@ export const getFriendRequestCounts = async (): Promise<FriendRequestCount[]> =>
   try {
     const response = await axiosInstance.get('/friends/count');
     return response.data.data;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const getFriendTreeStatus = async (friendId: string): Promise<FriendTreeStatus> => {
+  try {
+    const response = await axiosInstance.get(`/tree/${friendId}`);
+    return response.data.data as FriendTreeStatus;
   } catch (error) {
     handleAxiosError(error);
     throw error;
