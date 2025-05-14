@@ -26,6 +26,19 @@ export type FriendTreeStatus = {
   experience: number;
 };
 
+export type GuestbookPayload = {
+  userId: string;
+  content: string;
+};
+
+export type GuestbookEntry = {
+  guestbookId: number;
+  senderNickname: string;
+  senderUserId: string;
+  content: string;
+  createdAt: string;
+};
+
 export const getFriendList = async (): Promise<Friend[]> => {
   try {
     const response = await axiosInstance.get('/friends');
@@ -106,6 +119,25 @@ export const getFriendTreeStatus = async (friendId: string): Promise<FriendTreeS
   try {
     const response = await axiosInstance.get(`/tree/${friendId}`);
     return response.data.data as FriendTreeStatus;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const createGuestbookEntry = async (payload: GuestbookPayload): Promise<void> => {
+  try {
+    await axiosInstance.post('/guestbook', payload);
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const getGuestbookEntries = async (): Promise<GuestbookEntry[]> => {
+  try {
+    const response = await axiosInstance.get('/guestbook');
+    return response.data.data as GuestbookEntry[];
   } catch (error) {
     handleAxiosError(error);
     throw error;

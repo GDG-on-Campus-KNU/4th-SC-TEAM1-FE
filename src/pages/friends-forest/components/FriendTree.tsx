@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import Background from '../../mind-tree/assets/main-background.png';
 import { FriendTreeStatus, getFriendTreeStatus } from '../apis';
+import { FriendGuestBookModal } from './FriendGuestBookModal';
 import { FriendTreeScene } from './FriendTreeScene';
 import { FriendTreeStatusBar } from './FriendTreeStatusBar';
 
@@ -16,6 +17,7 @@ export const FriendTree = () => {
 
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<FriendTreeStatus | null>(null);
+  const [isGuestbookOpen, setGuestbookOpen] = useState(false);
 
   useEffect(() => {
     if (!rawFriendId) {
@@ -88,26 +90,31 @@ export const FriendTree = () => {
   const stageLabel = stageLabelMap[sceneStage];
 
   return (
-    <div
-      className="flex w-full flex-col bg-cover bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
-      style={{
-        backgroundImage: `url(${Background})`,
-        backgroundPosition: 'bottom center',
-      }}
-    >
-      <div className="mt-14 flex w-full shrink-0 justify-center px-4 md:mt-4">
-        <FriendTreeStatusBar
-          friendId={rawFriendId}
-          stage={stageLabel}
-          expPercent={expPercent}
-          currentExp={exp}
-          maxExp={maxExp}
-        />
-      </div>
+    <>
+      <div
+        className="flex w-full flex-col bg-cover bg-no-repeat sm:h-[calc(100vh-53px)] md:h-[calc(100vh-57px)]"
+        style={{
+          backgroundImage: `url(${Background})`,
+          backgroundPosition: 'bottom center',
+        }}
+      >
+        <div className="mt-14 flex w-full shrink-0 justify-center px-4 md:mt-4">
+          <FriendTreeStatusBar
+            friendId={rawFriendId}
+            stage={stageLabel}
+            expPercent={expPercent}
+            currentExp={exp}
+            maxExp={maxExp}
+          />
+        </div>
 
-      <div className="relative flex flex-1 items-end justify-center">
-        <FriendTreeScene stage={sceneStage} />
+        <div className="relative flex flex-1 items-end justify-center">
+          <FriendTreeScene stage={sceneStage} onOpenGuestbook={() => setGuestbookOpen(true)} />
+        </div>
       </div>
-    </div>
+      {isGuestbookOpen && (
+        <FriendGuestBookModal friendId={rawFriendId} onClose={() => setGuestbookOpen(false)} />
+      )}
+    </>
   );
 };
