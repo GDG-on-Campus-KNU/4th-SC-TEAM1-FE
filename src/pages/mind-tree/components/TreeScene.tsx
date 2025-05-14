@@ -1,3 +1,5 @@
+import React from 'react';
+
 import GuestBookIcon from '../assets/guest-book.png';
 import treeMature from '../assets/mature.png';
 import treeSapling from '../assets/sapling.png';
@@ -18,7 +20,7 @@ type TreeSceneProps = {
   onGuestbookClick: () => void;
 };
 
-export const TreeScene = ({ stage, onGuestbookClick }: TreeSceneProps) => {
+export const TreeScene: React.FC<TreeSceneProps> = ({ stage, onGuestbookClick }) => {
   return (
     <div className="relative min-h-full w-full overflow-hidden">
       <div className="absolute left-1/2 -translate-x-1/2 sm:bottom-[22%] md:bottom-[17%]">
@@ -29,7 +31,7 @@ export const TreeScene = ({ stage, onGuestbookClick }: TreeSceneProps) => {
         />
         <button
           onClick={onGuestbookClick}
-          className="animate-float absolute -right-4 -top-0 focus:outline-none"
+          className="absolute -right-4 -top-0 animate-float focus:outline-none"
           aria-label="방명록 열기"
         >
           <img src={GuestBookIcon} alt="방명록 아이콘" className="sm:w-[60px] md:w-[85px]" />

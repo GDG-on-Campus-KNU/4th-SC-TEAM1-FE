@@ -29,7 +29,7 @@ export const FriendTreeStatusBar = ({
         />
       </div>
       {/* 3) 현재/총 경험치 (작은 pill 형태) */}
-      <div className="absolute right-4 flex items-center px-2 py-[2px] text-[10px] font-semibold text-gray-700">
+      <div className="absolute right-4 flex items-center px-2 py-[2px] text-[10px] font-bold text-gray-700">
         {currentExp} / {maxExp}
       </div>
     </div>
