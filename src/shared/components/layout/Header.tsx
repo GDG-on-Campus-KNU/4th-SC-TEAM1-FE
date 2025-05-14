@@ -27,6 +27,7 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
     queryKey: ['points'],
     queryFn: fetchUserPoints,
     staleTime: 1000 * 60,
+    enabled: isLoggedIn,
   });
 
   const isActive = (path: string) => location.pathname === path;
