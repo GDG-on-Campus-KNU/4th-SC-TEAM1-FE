@@ -39,6 +39,12 @@ export type GuestbookEntry = {
   createdAt: string;
 };
 
+export type FriendDiaryEntry = {
+  diaryId: number;
+  createdAt: string;
+  emotion: string;
+};
+
 export const getFriendList = async (): Promise<Friend[]> => {
   try {
     const response = await axiosInstance.get('/friends');
@@ -138,6 +144,20 @@ export const getGuestbookEntries = async (): Promise<GuestbookEntry[]> => {
   try {
     const response = await axiosInstance.get('/guestbook');
     return response.data.data as GuestbookEntry[];
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const fetchFriendDiaries = async (
+  friendId: string,
+  year: number,
+  month: number,
+): Promise<FriendDiaryEntry[]> => {
+  try {
+    const response = await axiosInstance.get(`/diaries/friend/${friendId}/${year}/${month}`);
+    return response.data.data as FriendDiaryEntry[];
   } catch (error) {
     handleAxiosError(error);
     throw error;

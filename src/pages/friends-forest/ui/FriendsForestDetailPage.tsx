@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bookmark } from 'lucide-react';
 
 import { FriendTree } from '../components';
+import { FriendDiary } from '../components';
 
 export const FriendsForestDetailPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export const FriendsForestDetailPage: React.FC = () => {
       case 'guestbook':
         return <FriendTree />;
       case 'diary':
-        return <div className="p-4">📖 일기 보기 화면 (임시)</div>;
+        return <FriendDiary />;
       default:
         return <FriendTree />;
     }
