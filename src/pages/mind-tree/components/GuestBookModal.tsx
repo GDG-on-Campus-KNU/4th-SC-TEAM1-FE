@@ -11,7 +11,7 @@ type GuestBookModalProps = {
   onClose: () => void;
 };
 
-export const GuestBookModal: React.FC<GuestBookModalProps> = ({ isOpen, onClose }) => {
+const GuestBookModal: React.FC<GuestBookModalProps> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
 
   const {
@@ -96,3 +96,5 @@ export const GuestBookModal: React.FC<GuestBookModalProps> = ({ isOpen, onClose 
     </div>
   );
 };
+
+export default GuestBookModal;
