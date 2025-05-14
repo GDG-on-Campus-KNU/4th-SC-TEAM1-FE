@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { GrowthButtonType, getMyTreeStatus, growTree } from '../apis';
 import Background from '../assets/main-background.png';
-import { GuestbookModal } from '../components/GuestbookModal';
+import { GuestBookModal } from '../components';
 import { HelpModal } from '../components/HelpModal';
 import { TreeScene } from '../components/TreeScene';
 import { TreeStatusBar } from '../components/TreeStatusBar';
@@ -136,7 +136,7 @@ export const LoggedIn: React.FC = () => {
 
       {/* 모달 */}
       <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
-      <GuestbookModal isOpen={isGuestbookOpen} onClose={() => setIsGuestbookOpen(false)} />
+      <GuestBookModal isOpen={isGuestbookOpen} onClose={() => setIsGuestbookOpen(false)} />
     </div>
   );
 };
