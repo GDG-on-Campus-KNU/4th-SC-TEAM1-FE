@@ -33,23 +33,31 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
 
           <p>
             <span className="font-semibold text-primary">출석</span>과{' '}
-            <span className="font-semibold text-primary">일기 작성</span>을 통해 포인트를 모을 수
-            있어요.
+            <span className="font-semibold text-primary">일기 및 댓글 작성</span>을 통해 포인트를
+            모을 수 있어요.
           </p>
 
-          <p>포인트로 다음 활동을 할 수 있어요:</p>
+          <p>🌿포인트로 다음 활동을 할 수 있어요:</p>
 
-          <ul className="list-inside list-disc space-y-1 pl-1">
+          <ul className="list-inside space-y-1 pl-1">
             <li>
-              💧 <span className="font-medium text-gray-800">물 주기</span>: 감정나무에 생기를
-              불어넣어요.
+              <span className="font-medium text-gray-800">물 주기</span>: 감정나무에 생기를
+              불어넣어요. <span className="text-red-500">-10포인트</span>,{' '}
+              <span className="text-green-500">+10경험치</span>
             </li>
             <li>
-              ☀️ <span className="font-medium text-gray-800">햇빛 주기</span>: 따뜻한 에너지를 줘요.
+              <span className="font-medium text-gray-800">햇빛 주기</span>: 따뜻한 에너지를 줘요.{' '}
+              <span className="text-red-500">-15포인트</span>,{' '}
+              <span className="text-green-500">+20경험치</span>
             </li>
             <li>
-              🌿 <span className="font-medium text-gray-800">영양분 주기</span>: 튼튼하게 자라도록
-              도와줘요.
+              <span className="font-medium text-gray-800">영양분 주기</span>: 튼튼하게 자라도록
+              도와줘요. <span className="text-red-500">-20포인트</span>,{' '}
+              <span className="text-green-500">+30경험치</span>
+            </li>
+            <li>
+              <span className="font-medium text-gray-800">익명 해제</span>: 일기 댓글의 닉네임을
+              공개할 수 있어요. <span className="text-red-500">-2포인트</span>
             </li>
           </ul>
 
