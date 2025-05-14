@@ -1,3 +1,4 @@
+// src/components/FriendGuestBookModal.tsx
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -8,7 +9,7 @@ import {
   GuestbookEntry,
   GuestbookPayload,
   createGuestbookEntry,
-  getGuestbookEntries,
+  getFriendGuestbookEntries,
 } from '../apis';
 
 type FriendGuestBookModalProps = {
@@ -28,8 +29,8 @@ export const FriendGuestBookModal: React.FC<FriendGuestBookModalProps> = ({
     isPending: isPendingEntries,
     isError: isErrorEntries,
   } = useQuery<GuestbookEntry[], Error>({
-    queryKey: ['guestbookEntries', friendId],
-    queryFn: () => getGuestbookEntries(),
+    queryKey: ['friendGuestbook', friendId],
+    queryFn: () => getFriendGuestbookEntries(friendId),
     enabled: !!friendId,
   });
 
@@ -41,7 +42,9 @@ export const FriendGuestBookModal: React.FC<FriendGuestBookModalProps> = ({
     onSuccess: () => {
       toast.success('방명록을 남겼습니다');
       setContent('');
-      queryClient.invalidateQueries({ queryKey: ['guestbookEntries', friendId] });
+      queryClient.invalidateQueries({
+        queryKey: ['friendGuestbook', friendId],
+      });
     },
     onError: () => toast.error('방명록 작성에 실패했습니다'),
   });
@@ -61,8 +64,8 @@ export const FriendGuestBookModal: React.FC<FriendGuestBookModalProps> = ({
           </button>
         </div>
 
-        {/* 리스트 */}
-        <div className="mb-4 flex-1 space-y-3 overflow-auto">
+        {/* 리스트 (높이 제한 + 세로 스크롤) */}
+        <div className="mb-4 max-h-80 flex-1 space-y-3 overflow-y-auto">
           {isPendingEntries && <div className="text-center text-gray-500">로딩 중…</div>}
           {isErrorEntries && <div className="text-center text-red-500">불러오기 실패</div>}
           {!isPendingEntries && entries.length === 0 && (
@@ -86,15 +89,19 @@ export const FriendGuestBookModal: React.FC<FriendGuestBookModalProps> = ({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!content.trim()) return toast.error('내용을 입력해주세요');
+            if (!content.trim()) {
+              toast.error('내용을 입력해주세요');
+              return;
+            }
             writeEntry();
           }}
         >
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="메시지를 입력하세요…"
-            className="mb-3 h-24 w-full resize-none rounded-lg border border-gray-300 p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="토닥토닥, 친구에게 한마디 남겨보세요"
+            disabled={isPendingWrite}
+            className="mb-3 h-24 w-full resize-none rounded-lg border border-gray-300 p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
           />
           <button
             type="submit"

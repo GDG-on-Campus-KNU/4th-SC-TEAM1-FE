@@ -140,9 +140,9 @@ export const createGuestbookEntry = async (payload: GuestbookPayload): Promise<v
   }
 };
 
-export const getGuestbookEntries = async (): Promise<GuestbookEntry[]> => {
+export const getFriendGuestbookEntries = async (friendId: string): Promise<GuestbookEntry[]> => {
   try {
-    const response = await axiosInstance.get('/guestbook');
+    const response = await axiosInstance.get(`/guestbook/${friendId}`);
     return response.data.data as GuestbookEntry[];
   } catch (error) {
     handleAxiosError(error);
