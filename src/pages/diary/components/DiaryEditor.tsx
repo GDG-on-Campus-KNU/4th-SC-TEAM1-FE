@@ -102,6 +102,7 @@ export const DiaryEditor = ({
         await createDiary({ ...data, storageUUID });
         toast.success('일기가 저장되었어요!');
         onClose();
+        queryClient.invalidateQueries({ queryKey: ['points'] });
       } else {
         if (!diaryId) {
           toast.error('잘못된 접근입니다. diaryId가 필요해요.');

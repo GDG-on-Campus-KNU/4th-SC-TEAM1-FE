@@ -49,6 +49,7 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
     mutationFn: () => createComment(diaryId, newComment),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['comments', diaryId] });
+      queryClient.invalidateQueries({ queryKey: ['points'] });
       setNewComment('');
     },
   });
@@ -73,6 +74,7 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
     onSuccess: () => {
       toast.success('2포인트를 사용하였습니다.');
       queryClient.invalidateQueries({ queryKey: ['comments', diaryId] });
+      queryClient.invalidateQueries({ queryKey: ['points'] });
     },
     onError: () => {
       toast.error('남은 포인트를 확인해주세요');
