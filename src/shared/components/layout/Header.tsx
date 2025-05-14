@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useAuthStore } from '@shared/stores/authStore';
+import { useQuery } from '@tanstack/react-query';
 import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
 
+import { fetchUserPoints } from '../../apis';
 import Logo from '../../assets/todak.png';
 
 type HeaderProps = {
@@ -13,9 +15,17 @@ type HeaderProps = {
 export const Header = ({ onLoginClick }: HeaderProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-
   const { isLoggedIn, user } = useAuthStore();
-  const userPoint = 1200;
+
+  const {
+    data: userPoint = 0,
+    isLoading: isPointLoading,
+    isError: isPointError,
+  } = useQuery<number, Error>({
+    queryKey: ['points'],
+    queryFn: fetchUserPoints,
+    staleTime: 1000 * 60,
+  });
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -34,7 +44,8 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
               {/* 포인트 */}
               <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-3 py-1 text-sm font-extrabold text-gray-600">
                 <Gem className="h-4 w-4 text-yellow-500" />
-                {userPoint} P
+                {/* 로딩중엔 스켈레톤 대신 0 표시 or 로딩 스피너 */}
+                {isPointLoading ? '…' : isPointError ? 'Error' : `${userPoint} P`}
               </div>
 
               {/* 페이지 링크 */}
@@ -77,10 +88,9 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
           {isLoggedIn && (
             <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-2 py-1 text-sm font-extrabold text-gray-600">
               <Gem className="h-4 w-4 text-yellow-500" />
-              {userPoint} P
+              {isPointLoading ? '…' : isPointError ? 'Error' : `${userPoint} P`}
             </div>
           )}
-
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="메뉴 열기"
@@ -90,7 +100,6 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
           </button>
         </div>
       </div>
-
       {/* 모바일 드롭다운 */}
       {menuOpen && isLoggedIn && (
         <div className="mt-2 space-y-2 divide-y divide-gray-200 border-t bg-white px-4 py-2 md:hidden">
@@ -132,6 +141,5 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
 
 const navClass = (active: boolean) =>
   `font-medium hover:text-primary ${active ? 'font-semibold text-primary' : 'text-gray-600'}`;
-
 const dropdownClass = (active: boolean) =>
   `flex items-center gap-2 py-2 text-sm ${active ? 'font-semibold text-primary' : 'text-gray-600'}`;
