@@ -30,7 +30,10 @@ export const logout = async (): Promise<void> => {
   }
 
   try {
-    await axiosInstance.post('/members/logout', { refreshToken: refresh });
+    // body 없이 호출
+    await axiosInstance.post('/members/logout');
+
+    // 토큰 제거 및 상태 초기화
     accessToken.remove();
     refreshTokenUtil.remove();
     useAuthStore.getState().logout();
@@ -70,18 +73,23 @@ export const checkUserId = async (userId: string): Promise<boolean> => {
 
 export const refreshAccessToken = async (): Promise<string> => {
   const refresh = refreshTokenUtil.get();
-  if (!refresh) {
-    throw new Error('Refresh Token이 없습니다. 다시 로그인해주세요.');
+  const currentAccess = accessToken.get();
+  if (!refresh || !currentAccess) {
+    throw new Error('Access/Refresh Token이 없습니다. 다시 로그인해주세요.');
   }
 
   try {
     const response = await axiosInstance.post(
-      '/auth/refresh',
-      { refreshToken: refresh },
+      '/auth/reissue', // 1) 엔드포인트를 /auth/reissue로 변경
+      {
+        accessToken: currentAccess, // 3) 기존 액세스 토큰 함께 전송
+        refreshToken: refresh,
+      },
       {
         skipAuthRefresh: true,
       },
     );
+
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
 
     accessToken.set(newAccessToken);

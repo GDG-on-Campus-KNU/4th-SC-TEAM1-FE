@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+// src/components/FriendCalendar.tsx
+import React, { useMemo } from 'react';
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
@@ -6,13 +7,19 @@ import '@pages/diary/styles/monthEmotions.css';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
-type CalendarProps = {
-  selected: Date | undefined;
+export type FriendCalendarProps = {
+  selectedDate: Date;
   onDayClick: (date: Date) => void;
   diaryDates: Record<string, string>;
+  friendId: string; // 친구 ID prop 추가
 };
 
-export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) => {
+const FriendCalendar: React.FC<FriendCalendarProps> = ({
+  selectedDate,
+  onDayClick,
+  diaryDates,
+  friendId,
+}) => {
   const today = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -23,20 +30,11 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
 
   const getDatesByEmotion = (emotion: string) =>
     Object.entries(diaryDates)
-      .filter(([, value]) => value === emotion)
+      .filter(([, e]) => e === emotion)
       .map(([dateStr]) => new Date(dateStr));
 
-  const selectDay = (date: Date | undefined) => {
+  const handleSelect = (date: Date | undefined) => {
     if (!date) return;
-
-    const selectedStr = format(selected ?? new Date(0), 'yyyy-MM-dd');
-    const clickedStr = format(date, 'yyyy-MM-dd');
-
-    if (selectedStr === clickedStr) {
-      onDayClick(date);
-      return;
-    }
-
     onDayClick(date);
   };
 
@@ -44,19 +42,18 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
     <div className="mx-auto w-full rounded-xl bg-white px-3 pb-4 pt-2 opacity-95 shadow-md sm:max-w-sm lg:max-w-xl lg:px-6 lg:pb-6 lg:pt-4">
       <DayPicker
         mode="single"
-        required
-        selected={selected}
-        onSelect={selectDay}
+        selected={selectedDate}
+        onSelect={handleSelect}
         disabled={(date) => {
-          const dateStr = format(date, 'yyyy-MM-dd');
-          const isToday = date.toDateString() === today.toDateString();
+          const d = format(date, 'yyyy-MM-dd');
+          const isToday = date.getTime() === today.getTime();
           const isFuture = date.getTime() > today.getTime();
-
-          return (!diaryDates[dateStr] && !isToday) || isFuture;
+          return (!diaryDates[d] && !isToday) || isFuture;
         }}
         locale={ko}
         formatters={{
-          formatCaption: (date) => format(date, 'yyyy년 M월', { locale: ko }),
+          formatCaption: (date) =>
+            `${format(date, 'yyyy년 M월,', { locale: ko })} ${friendId}의 일기`,
         }}
         modifiers={{
           happy: getDatesByEmotion('HAPPY'),
@@ -85,3 +82,5 @@ export const Calendar = ({ selected, onDayClick, diaryDates }: CalendarProps) =>
     </div>
   );
 };
+
+export default FriendCalendar;

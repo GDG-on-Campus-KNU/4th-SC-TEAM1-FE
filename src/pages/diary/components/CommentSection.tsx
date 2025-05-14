@@ -1,3 +1,4 @@
+// src/components/CommentSection.tsx
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -39,12 +40,7 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
   const [newComment, setNewComment] = useState('');
   const [editingMap, setEditingMap] = useState<Record<number, string>>({});
 
-  const { data, isLoading } = useQuery<
-    CommentResponse,
-    Error,
-    CommentResponse,
-    [string, number, number]
-  >({
+  const { data, isLoading } = useQuery<CommentResponse, Error>({
     queryKey: ['comments', diaryId, page] as const,
     queryFn: () => fetchComments(diaryId, page, 5),
   });
@@ -95,6 +91,8 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
+  const isCreating = createMutation.isPending;
+
   return (
     <div className="mt-6 rounded-xl bg-white p-4 shadow-sm">
       <h3 className="mb-4 text-sm font-semibold text-primary">🌱 댓글</h3>
@@ -116,14 +114,20 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
                   <textarea
                     value={editingMap[comment.id]}
                     onChange={(e) =>
-                      setEditingMap((prev) => ({ ...prev, [comment.id]: e.target.value }))
+                      setEditingMap((prev) => ({
+                        ...prev,
+                        [comment.id]: e.target.value,
+                      }))
                     }
                     className="w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <div className="mt-2 flex gap-3 text-xs">
                     <button
                       onClick={() =>
-                        updateMutation.mutate({ id: comment.id, content: editingMap[comment.id] })
+                        updateMutation.mutate({
+                          id: comment.id,
+                          content: editingMap[comment.id],
+                        })
                       }
                       className="rounded bg-primary px-3 py-1 text-white hover:bg-primary/90"
                     >
@@ -151,7 +155,10 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
                       <>
                         <button
                           onClick={() =>
-                            setEditingMap((prev) => ({ ...prev, [comment.id]: comment.content }))
+                            setEditingMap((prev) => ({
+                              ...prev,
+                              [comment.id]: comment.content,
+                            }))
                           }
                           className="text-primary hover:underline"
                         >
@@ -209,14 +216,18 @@ export const CommentSection = ({ diaryId }: CommentSectionProps) => {
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="마음을 담은 댓글을 남겨보세요..."
-          className="min-h-[80px] w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder={isCreating ? '댓글 저장중…' : '마음을 담은 댓글을 남겨보세요...'}
+          disabled={isCreating}
+          className="min-h-[80px] w-full rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
         />
         <button
           type="submit"
-          className="mt-2 w-full rounded-lg bg-primary py-2 text-white transition hover:bg-primary/90"
+          disabled={isCreating || !newComment.trim()}
+          className={`mt-2 w-full rounded-lg py-2 text-white transition ${
+            isCreating ? 'cursor-not-allowed bg-primary/70' : 'bg-primary hover:bg-primary/90'
+          }`}
         >
-          댓글 작성
+          {isCreating ? '댓글 저장중…' : '댓글 작성'}
         </button>
       </form>
     </div>
