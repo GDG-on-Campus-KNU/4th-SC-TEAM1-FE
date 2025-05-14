@@ -11,14 +11,32 @@ type PointLogModalProps = {
 };
 
 const translatePointType = (type: string): string => {
-  if (type === 'GET_COMMENT_WRITER_ID') return '익명 닉네임 열람';
-  if (type === 'DIARY') return '일기 작성';
-  if (type === 'COMMENT') return '댓글 작성';
-  if (type.startsWith('ATTENDANCE')) return '출석 보상';
-  if (type === 'GROWTH_WATER') return '나무에 물주기';
-  if (type === 'GROWTH_SUN') return '나무에 햇살주기';
-  if (type === 'GROWTH_NUTRIENT') return '나무에 영양분주기';
-  return type.replace(/_/g, ' ');
+  switch (type) {
+    case 'ATTENDANCE_DAY_1':
+      return '1일차 출석 보상';
+    case 'ATTENDANCE_DAY_2':
+      return '2일차 출석 보상';
+    case 'ATTENDANCE_DAY_3':
+      return '3일차 출석 보상';
+    case 'ATTENDANCE_DAY_4':
+      return '4일차 출석 보상';
+    case 'ATTENDANCE_DAY_5_OR_MORE':
+      return '5일차 이상 출석 보상';
+    case 'DIARY':
+      return '일기 작성';
+    case 'COMMENT':
+      return '댓글 작성';
+    case 'GROWTH_WATER':
+      return '나무에 물주기';
+    case 'GROWTH_SUN':
+      return '나무에 햇살 주기';
+    case 'GROWTH_NUTRIENT':
+      return '나무에 영양분 주기';
+    case 'GET_COMMENT_WRITER_ID':
+      return '익명 닉네임 열람';
+    default:
+      return type.replace(/_/g, ' ');
+  }
 };
 
 export const PointLogModal: React.FC<PointLogModalProps> = ({ onClose }) => {
