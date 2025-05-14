@@ -5,12 +5,20 @@ type TreeStage = '씨앗' | '새싹' | '묘목' | '어린나무' | '성목';
 type TreeStatusBarProps = {
   stage: TreeStage;
   expPercent: number;
+  currentExp: number;
+  maxExp: number;
   onHelpClick: () => void;
 };
 
-export const TreeStatusBar = ({ stage, expPercent, onHelpClick }: TreeStatusBarProps) => {
+export const TreeStatusBar = ({
+  stage,
+  expPercent,
+  currentExp,
+  maxExp,
+  onHelpClick,
+}: TreeStatusBarProps) => {
   return (
-    <div className="flex w-full max-w-3xl items-center justify-between gap-4 rounded-xl bg-white/80 px-4 py-3 shadow-md backdrop-blur-sm">
+    <div className="relative flex w-full max-w-3xl items-center justify-between gap-4 rounded-xl bg-white/80 px-4 py-3 shadow-md backdrop-blur-sm">
       {/* 단계 텍스트 */}
       <div className="text-sm font-extrabold text-primary sm:text-base">{stage}</div>
 
@@ -30,6 +38,11 @@ export const TreeStatusBar = ({ stage, expPercent, onHelpClick }: TreeStatusBarP
       >
         <HelpCircle className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
+
+      {/* 현재 경험치/최대 경험치 표시 */}
+      <div className="absolute right-14 flex items-center px-2 py-[2px] text-[10px] font-bold text-gray-700">
+        {currentExp} / {maxExp}
+      </div>
     </div>
   );
 };

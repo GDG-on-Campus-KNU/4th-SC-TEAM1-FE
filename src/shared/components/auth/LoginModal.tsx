@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '@shared/apis';
 import { useAuthStore } from '@shared/stores/authStore';
 import { accessToken, refreshToken } from '@shared/utils/token';
+import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Eye, EyeOff, X } from 'lucide-react';
 
@@ -20,6 +21,7 @@ type LoginFormInputs = {
 };
 
 export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -44,7 +46,8 @@ export const LoginModal = ({ onClose, onSwitch }: LoginModalProps) => {
       useAuthStore.getState().login({ userId, nickname });
 
       toast.success(`${nickname}님 환영합니다!`);
-      onClose(); // ✅ 성공 시에만 닫힘
+      onClose();
+      queryClient.invalidateQueries({ queryKey: ['points'] });
       navigate('/');
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
