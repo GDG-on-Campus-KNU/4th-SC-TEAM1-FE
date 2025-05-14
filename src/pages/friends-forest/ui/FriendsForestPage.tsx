@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Inbox, Send, UserPlus } from 'lucide-react';
@@ -20,6 +21,7 @@ export const FriendsForestPage = () => {
   const [showReceivedRequestModal, setShowReceivedRequestModal] = useState(false);
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: friends = [], isLoading: isFriendsLoading } = useQuery<Friend[]>({
     queryKey: ['friendList'],
@@ -160,7 +162,10 @@ export const FriendsForestPage = () => {
                         <span className="font-medium">{friend.friendId}</span>
                       </div>
                       <div className="flex gap-3">
-                        <button className="text-xs text-green-600 hover:underline">
+                        <button
+                          onClick={() => navigate(`/forests/${friend.friendId}`)}
+                          className="text-xs text-green-600 hover:underline"
+                        >
                           🌱 놀러가기
                         </button>
                         <button

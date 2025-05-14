@@ -3,14 +3,13 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { DiaryPage } from '@pages/diary';
 import { ErrorPage } from '@pages/error';
 import { FriendsForestPage } from '@pages/friends-forest';
+import { FriendsForestDetailPage } from '@pages/friends-forest';
 import { MindTreePage } from '@pages/mind-tree';
 import { Mypage } from '@pages/mypage';
 import { Layout } from '@shared/components';
 import { RouterPath } from '@shared/constants';
 
 import { PrivateRoute } from './PrivateRoute';
-
-// Layout import
 
 const router = createBrowserRouter([
   {
@@ -38,6 +37,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: RouterPath.FOREST_DETAIL,
+        element: (
+          <PrivateRoute>
+            <FriendsForestDetailPage />
+          </PrivateRoute>
+        ),
+      },
+      {
         path: RouterPath.MYPAGE,
         element: (
           <PrivateRoute>
@@ -49,7 +56,7 @@ const router = createBrowserRouter([
   },
   {
     path: RouterPath.ERROR,
-    element: <ErrorPage />, // ❗ Layout 없이 단독 페이지
+    element: <ErrorPage />,
   },
 ]);
 
