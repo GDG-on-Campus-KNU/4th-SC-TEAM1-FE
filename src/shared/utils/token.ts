@@ -1,7 +1,7 @@
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 
-const storage = localStorage; // 필요 시 sessionStorage로 교체 가능
+const storage = localStorage;
 
 type TokenHandler = {
   set: (token: string) => void;
