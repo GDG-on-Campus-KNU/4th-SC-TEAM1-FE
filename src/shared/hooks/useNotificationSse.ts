@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react';
 
 import { BASE_URL } from '@shared/constants';
 import { useAuthStore } from '@shared/stores/authStore';
-import { accessToken, clearTokens } from '@shared/utils';
+import { accessToken } from '@shared/utils';
+import { resetOnCriticalError } from '@shared/utils';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import { Notification } from '../apis';
@@ -13,9 +14,8 @@ let isRefreshing = false;
 
 export function useNotificationSse() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const logout = useAuthStore.getState().logout;
 
-  const add = useNotificationStore.getState().add;
+  const addRef = useRef(useNotificationStore.getState().add);
   const setAll = useNotificationStore.getState().setAll;
 
   const esRef = useRef<EventSourcePolyfill | null>(null);
@@ -38,7 +38,7 @@ export function useNotificationSse() {
       es.addEventListener('notification', (event) => {
         try {
           const data: Notification = JSON.parse((event as MessageEvent).data);
-          add({ ...data });
+          addRef.current(data);
         } catch (e) {
           console.error('[SSE] 알림 파싱 오류:', e);
         }
@@ -58,9 +58,7 @@ export function useNotificationSse() {
             connectSse(newAccessToken);
           } catch {
             console.error('[SSE] 토큰 재발급 실패, 로그아웃 처리');
-            clearTokens();
-            logout();
-            window.location.href = '/';
+            resetOnCriticalError();
           } finally {
             isRefreshing = false;
           }
@@ -81,7 +79,7 @@ export function useNotificationSse() {
     return () => {
       esRef.current?.close();
     };
-  }, [isLoggedIn, logout, add]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!isLoggedIn) {
