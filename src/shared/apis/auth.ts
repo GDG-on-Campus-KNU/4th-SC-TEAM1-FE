@@ -1,3 +1,5 @@
+import { resetOnCriticalError } from '@shared/utils';
+
 import { axiosInstance } from '../lib/axiosInstance';
 import { useAuthStore } from '../stores/authStore';
 import type { LoginRequest, LoginResponse, SignupRequest, SuccessResponse } from '../types';
@@ -30,10 +32,7 @@ export const logout = async (): Promise<void> => {
   }
 
   try {
-    // body 없이 호출
     await axiosInstance.post('/members/logout');
-
-    // 토큰 제거 및 상태 초기화
     accessToken.remove();
     refreshTokenUtil.remove();
     useAuthStore.getState().logout();
@@ -98,6 +97,7 @@ export const refreshAccessToken = async (): Promise<string> => {
     return newAccessToken;
   } catch (error) {
     handleAxiosError(error);
+    resetOnCriticalError();
     throw error;
   }
 };
