@@ -3,10 +3,11 @@ import { Link, useLocation } from 'react-router-dom';
 
 import { useAuthStore } from '@shared/stores/authStore';
 import { useQuery } from '@tanstack/react-query';
-import { Bell, Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
+import { Gem, Menu, NotebookPen, TreeDeciduous, Trees, UserRound } from 'lucide-react';
 
 import { fetchUserPoints } from '../../apis/pointApi';
 import Logo from '../../assets/todak.png';
+import { NotificationBell } from './NotificationBell';
 import { PointLogModal } from './PointLogModal';
 
 type HeaderProps = {
@@ -66,9 +67,7 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
                 </Link>
 
                 {/* 알림 */}
-                <button className="relative" aria-label="알림">
-                  <Bell className="h-5 w-5 text-gray-600 hover:text-primary" />
-                </button>
+                <NotificationBell />
 
                 {/* 마이페이지 */}
                 <Link
@@ -100,6 +99,8 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
                 {isPointLoading ? '…' : isPointError ? 'Error' : `${userPoint} P`}
               </div>
             )}
+            {/* 모바일용 알림 벨 */}
+            {isLoggedIn && <NotificationBell />}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="메뉴 열기"
@@ -113,12 +114,6 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
         {/* 모바일 드롭다운 */}
         {menuOpen && isLoggedIn && (
           <div className="mt-2 space-y-2 divide-y divide-gray-200 border-t bg-white px-4 py-2 md:hidden">
-            <button
-              className="flex items-center gap-2 py-2 text-sm"
-              onClick={() => setMenuOpen(false)}
-            >
-              <Bell className="h-4 w-4 text-gray-600" /> 알림
-            </button>
             <Link
               to="/"
               className={dropdownClass(isActive('/'))}
