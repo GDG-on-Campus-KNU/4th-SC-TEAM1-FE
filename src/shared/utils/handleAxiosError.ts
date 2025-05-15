@@ -42,6 +42,6 @@ export const handleAxiosError = (error: unknown): never => {
     }
   }
 
-  toast.error('인터넷 연결 상태를 확인해 주세요.');
+  window.location.reload();
   throw new Error('네트워크 오류가 발생했습니다.');
 };
