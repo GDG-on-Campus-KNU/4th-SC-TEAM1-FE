@@ -40,3 +40,27 @@ export const changePassword = async (payload: ChangePasswordPayload): Promise<vo
     throw error;
   }
 };
+
+export const uploadProfilePhoto = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await axiosInstance.put('/members/profile', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.data.imageUrl as string;
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const deleteProfilePhoto = async (): Promise<void> => {
+  try {
+    await axiosInstance.delete('/members/profile');
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};

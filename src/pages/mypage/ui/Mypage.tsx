@@ -1,4 +1,3 @@
-// src/pages/Mypage.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -12,8 +11,10 @@ import {
   ChangePasswordPayload,
   MemberProfile,
   changePassword,
+  deleteProfilePhoto,
   fetchMyProfile,
   updateMyNickname,
+  uploadProfilePhoto,
 } from '../apis';
 import Background from '../assets/mypage-background.png';
 
@@ -35,17 +36,34 @@ export const Mypage: React.FC = () => {
 
   const [nicknameInput, setNicknameInput] = useState('');
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
-
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordCheck, setNewPasswordCheck] = useState('');
   const [showOld, setShowOld] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showCheck, setShowCheck] = useState(false);
-
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const isBusy = isLoggingOut || isDeleting;
+
+  const { mutate: uploadPhoto, isPending: isUploading } = useMutation<string, Error, File>({
+    mutationFn: uploadProfilePhoto,
+    onSuccess: (url: string) => {
+      setProfilePreview(url);
+      toast.success('📸 프로필 사진이 업로드되었습니다!');
+      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
+    },
+  });
+
+  const { mutate: removePhoto, isPending: isDeletingPhoto } = useMutation<void, Error, void>({
+    mutationFn: deleteProfilePhoto,
+    onSuccess: () => {
+      setProfilePreview(null);
+      toast.success('🗑️ 프로필 사진이 삭제되었습니다!');
+      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
+    },
+  });
+
+  const isBusy = isLoggingOut || isDeleting || isUploading || isDeletingPhoto;
 
   useEffect(() => {
     if (me) {
@@ -83,7 +101,9 @@ export const Mypage: React.FC = () => {
 
   const onProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setProfilePreview(URL.createObjectURL(file));
+    if (!file) return;
+    setProfilePreview(URL.createObjectURL(file));
+    uploadPhoto(file);
   };
 
   const logoutUser = async () => {
@@ -157,16 +177,29 @@ export const Mypage: React.FC = () => {
         <div className="mb-6 flex flex-col items-center gap-2">
           <div className="relative">
             <img
-              src={profilePreview!}
+              src={
+                profilePreview
+                  ? `https://www.todak.site${profilePreview}`
+                  : 'https://www.todak.site/backend/images/files/default-profile-image.png'
+              }
               alt="프로필 이미지"
               className="h-24 w-24 rounded-full border border-gray-300 object-cover"
             />
             <button
-              className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-primary p-1.5 text-white hover:bg-primary/90 disabled:opacity-50"
               onClick={() => fileInputRef.current?.click()}
               disabled={isBusy}
+              className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-primary p-1.5 text-white hover:bg-primary/90 disabled:opacity-50"
+              title="프로필 업로드"
             >
               <Upload className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => removePhoto()}
+              disabled={isBusy}
+              className="absolute bottom-0 left-0 flex items-center justify-center rounded-full bg-red-500 p-1.5 text-white hover:bg-red-600 disabled:opacity-50"
+              title="프로필 삭제"
+            >
+              <Trash2 className="h-4 w-4" />
             </button>
             <input
               ref={fileInputRef}
@@ -176,7 +209,7 @@ export const Mypage: React.FC = () => {
               className="hidden"
             />
           </div>
-          <span className="text-xs text-gray-500">업로드 버튼을 눌러 프로필 변경 (준비 중)</span>
+          <span className="text-xs text-gray-500">사진을 업로드하거나 삭제해 보세요</span>
         </div>
 
         {/* 사용자 계정 (읽기전용) */}
