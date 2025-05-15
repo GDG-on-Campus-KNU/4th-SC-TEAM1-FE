@@ -210,6 +210,9 @@ export const Mypage: React.FC = () => {
             />
           </div>
           <span className="text-xs text-gray-500">사진을 업로드하거나 삭제해 보세요</span>
+          <span className="text-xs text-gray-500">
+            프로필 사진은 다음 업데이트에서 사용될 예정이에요😎
+          </span>
         </div>
 
         {/* 사용자 계정 (읽기전용) */}

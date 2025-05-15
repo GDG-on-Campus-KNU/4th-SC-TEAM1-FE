@@ -21,6 +21,7 @@ type ReceivedRequest = {
 export const ReceivedRequestModal = ({ onClose }: { onClose: () => void }) => {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'DECLINED'>('PENDING');
   const queryClient = useQueryClient();
+  const [pendingId, setPendingId] = useState<number | null>(null);
 
   const { data: requests = [], isLoading } = useQuery<ReceivedRequest[]>({
     queryKey: ['receivedFriendRequests'],
@@ -193,20 +194,28 @@ export const ReceivedRequestModal = ({ onClose }: { onClose: () => void }) => {
                     {activeTab === 'PENDING' && (
                       <>
                         <button
-                          onClick={() => acceptMutation.mutate(req.friendRequestId)}
-                          disabled={acceptMutation.isPending}
-                          className="text-xs text-green-600 hover:underline"
+                          onClick={() => {
+                            setPendingId(req.friendRequestId);
+                            acceptMutation.mutate(req.friendRequestId, {
+                              onSettled: () => setPendingId(null),
+                            });
+                          }}
+                          disabled={pendingId === req.friendRequestId}
+                          className="text-xs text-green-600 hover:underline disabled:opacity-50"
                         >
                           수락
                         </button>
                         <button
                           onClick={() => {
                             if (window.confirm('정말 요청을 거절하시겠습니까?')) {
-                              declineMutation.mutate(req.friendRequestId);
+                              setPendingId(req.friendRequestId);
+                              declineMutation.mutate(req.friendRequestId, {
+                                onSettled: () => setPendingId(null),
+                              });
                             }
                           }}
-                          disabled={declineMutation.isPending}
-                          className="text-xs text-gray-500 hover:underline"
+                          disabled={pendingId === req.friendRequestId}
+                          className="text-xs text-gray-500 hover:underline disabled:opacity-50"
                         >
                           거절
                         </button>
@@ -216,11 +225,14 @@ export const ReceivedRequestModal = ({ onClose }: { onClose: () => void }) => {
                       <button
                         onClick={() => {
                           if (window.confirm('정말 지우시겠습니까?')) {
-                            deleteMutation.mutate(req.friendRequestId);
+                            setPendingId(req.friendRequestId);
+                            deleteMutation.mutate(req.friendRequestId, {
+                              onSettled: () => setPendingId(null),
+                            });
                           }
                         }}
-                        disabled={deleteMutation.isPending}
-                        className="text-xs text-red-500 hover:underline"
+                        disabled={pendingId === req.friendRequestId}
+                        className="text-xs text-red-500 hover:underline disabled:opacity-50"
                       >
                         지우기
                       </button>

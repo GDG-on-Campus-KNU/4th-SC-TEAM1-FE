@@ -7,15 +7,16 @@ export interface Notification {
   senderUserId: string;
   receiverUserId: string;
   type: string;
+  diaryCreatedAt: string;
   createdAt: string;
 }
 
-interface ApiResponse<T> {
+type ApiResponse<T> = {
   code: number;
   status: string;
   message: string;
   data: T;
-}
+};
 
 export const fetchUncheckedNotifications = async (): Promise<Notification[]> => {
   try {

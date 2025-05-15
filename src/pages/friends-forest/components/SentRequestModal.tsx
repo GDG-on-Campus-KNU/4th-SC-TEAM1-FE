@@ -16,6 +16,7 @@ type SentRequest = {
 export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'DECLINED'>('PENDING');
   const queryClient = useQueryClient();
+  const [pendingId, setPendingId] = useState<number | null>(null);
 
   const { data: requests = [], isLoading } = useQuery<SentRequest[]>({
     queryKey: ['sentFriendRequests'],
@@ -108,9 +109,14 @@ export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
                 >
                   <span className="font-medium">{req.accepterName}</span>
                   <button
-                    onClick={() => deleteMutation.mutate(req.friendRequestId)}
-                    disabled={deleteMutation.isPending}
-                    className={`text-xs font-medium ${
+                    onClick={() => {
+                      setPendingId(req.friendRequestId);
+                      deleteMutation.mutate(req.friendRequestId, {
+                        onSettled: () => setPendingId(null),
+                      });
+                    }}
+                    disabled={pendingId === req.friendRequestId}
+                    className={`text-xs font-medium disabled:opacity-50 ${
                       activeTab === 'PENDING'
                         ? 'text-gray-500 hover:text-gray-700'
                         : 'text-red-500 hover:text-red-700'
