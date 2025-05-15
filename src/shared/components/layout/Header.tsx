@@ -90,24 +90,32 @@ export const Header = ({ onLoginClick }: HeaderProps) => {
 
           {/* 모바일 메뉴 버튼 */}
           <div className="flex items-center gap-3 md:hidden">
-            {isLoggedIn && (
-              <div
-                onClick={() => setPointLogOpen(true)}
-                className="flex cursor-pointer items-center gap-1 rounded-full bg-secondary/40 px-2 py-1 text-sm font-extrabold text-gray-600"
+            {isLoggedIn ? (
+              <>
+                <div
+                  onClick={() => setPointLogOpen(true)}
+                  className="flex cursor-pointer items-center gap-1 rounded-full bg-secondary/40 px-2 py-1 text-sm font-extrabold text-gray-600"
+                >
+                  <Gem className="h-4 w-4 text-yellow-500" />
+                  {isPointLoading ? '…' : isPointError ? 'Error' : `${userPoint} P`}
+                </div>
+                <NotificationBell />
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  aria-label="메뉴 열기"
+                  className="text-gray-700"
+                >
+                  <Menu className="h-6 w-6" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onLoginClick}
+                className="flex items-center gap-1 rounded-full bg-primary/85 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary/100"
               >
-                <Gem className="h-4 w-4 text-yellow-500" />
-                {isPointLoading ? '…' : isPointError ? 'Error' : `${userPoint} P`}
-              </div>
+                <UserRound className="h-4 w-4" /> 로그인
+              </button>
             )}
-            {/* 모바일용 알림 벨 */}
-            {isLoggedIn && <NotificationBell />}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="메뉴 열기"
-              className="text-gray-700"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
           </div>
         </div>
 
