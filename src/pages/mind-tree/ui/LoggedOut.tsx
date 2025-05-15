@@ -48,11 +48,11 @@ export const LoggedOut = ({ setModal }: LoggedOutProps) => {
         </div>
         <div className="flex items-center gap-2">
           <span>💌</span>
-          <span>이웃과 마음을 나눠요</span>
+          <span>소중한 친구와 마음을 나눠요</span>
         </div>
         <div className="flex items-center gap-2">
           <span>☺️</span>
-          <span>AI 토닥 친구가 함께해요</span>
+          <span>AI 토닥이가 함께해요</span>
         </div>
       </div>
 
