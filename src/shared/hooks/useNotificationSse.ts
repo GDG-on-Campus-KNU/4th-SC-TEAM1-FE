@@ -27,7 +27,7 @@ export function useNotificationSse() {
     // 기존 연결 닫기
     esRef.current?.close();
 
-    const es = new EventSourcePolyfill(`${BASE_URL}/api/v1/notifications/create`, {
+    const es = new EventSourcePolyfill(`${BASE_URL}/notifications/create`, {
       headers: { Authorization: `Bearer ${token}` },
       // withCredentials: true, // 쿠키 기반 인증일 때 필요
     });
