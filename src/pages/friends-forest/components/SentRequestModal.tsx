@@ -92,7 +92,7 @@ export const SentRequestModal = ({ onClose }: { onClose: () => void }) => {
         </div>
 
         <p className="mb-2 text-center text-sm text-gray-600 sm:text-base">
-          {activeTab === 'PENDING' ? '친구 요청이 대기중입니다.' : '친구 요청이 거절되었습니다.'}
+          {activeTab === 'PENDING' ? '친구가 요청을 대기중입니다.' : '친구가 요청을 거절했습니다.'}
         </p>
 
         <div className="max-h-[35vh] min-h-[140px] overflow-y-auto rounded-md border p-2">

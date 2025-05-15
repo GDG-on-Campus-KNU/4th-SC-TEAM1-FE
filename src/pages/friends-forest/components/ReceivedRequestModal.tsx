@@ -165,7 +165,7 @@ export const ReceivedRequestModal = ({ onClose }: { onClose: () => void }) => {
                 : 'bg-gray-100 text-gray-600'
             }`}
           >
-            대기중인 요청입니다.
+            대기중인 요청
           </button>
           <button
             onClick={() => setActiveTab('DECLINED')}
@@ -173,7 +173,7 @@ export const ReceivedRequestModal = ({ onClose }: { onClose: () => void }) => {
               activeTab === 'DECLINED' ? 'bg-red-200 text-red-900' : 'bg-gray-100 text-gray-600'
             }`}
           >
-            거절한 요청입니다.
+            거절한 요청
           </button>
         </div>
 
