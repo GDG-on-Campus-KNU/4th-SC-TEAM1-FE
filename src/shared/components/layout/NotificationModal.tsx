@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import toast from 'react-hot-toast';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
@@ -30,6 +31,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
     mutationFn: (notificationId: string) => ackNotification(notificationId),
     onSuccess: (_data, notificationId) => {
       remove(notificationId);
+      toast.success('알림이 제거되었어요');
       queryClient.invalidateQueries({ queryKey: ['notifications', 'unchecked'] });
     },
   });
