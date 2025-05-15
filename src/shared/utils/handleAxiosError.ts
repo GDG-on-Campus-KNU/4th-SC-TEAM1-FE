@@ -16,10 +16,6 @@ export const handleAxiosError = (error: unknown): never => {
         toast.error(message || '입력한 내용을 다시 한 번 확인해 주세요.');
         throw new Error(message);
 
-      case 401:
-        toast.error('로그인이 필요한 서비스예요. 로그인 후 다시 시도해 주세요.');
-        throw new Error('로그인이 필요합니다.');
-
       case 404:
         toast.error(message || '요청하신 페이지를 찾을 수 없어요.');
         throw new Error('리소스를 찾을 수 없습니다.');
