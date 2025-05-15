@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import { refreshAccessToken } from '@shared/apis';
 import { useAuthStore } from '@shared/stores/authStore';
-import { clearTokens, refreshToken } from '@shared/utils/token';
+import { accessToken, clearTokens, refreshToken } from '@shared/utils/token';
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchUncheckedNotifications } from '../../apis';
@@ -16,6 +16,10 @@ export const AppInit = () => {
   useEffect(() => {
     const tryRestoreLogin = async () => {
       const refresh = refreshToken.get();
+      const access = accessToken.get();
+
+      if (access && refresh) return;
+
       if (!refresh) return;
 
       try {

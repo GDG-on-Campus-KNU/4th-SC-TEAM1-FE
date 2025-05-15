@@ -45,13 +45,18 @@ export function useNotificationSse() {
       });
 
       es.onerror = async (e: Event) => {
-        console.error('[SSE] 연결 오류 발생');
+        console.error('[SSE] 연결 오류 발생', e);
 
         const target = e.currentTarget as EventSourcePolyfill;
 
-        if (target?.readyState === EventSourcePolyfill.CLOSED && !isRefreshing) {
-          isRefreshing = true;
+        const errorData = e instanceof MessageEvent ? e.data : null;
 
+        if (
+          target?.readyState === EventSourcePolyfill.CLOSED &&
+          !isRefreshing &&
+          errorData === '유효하지 않은 토큰입니다.'
+        ) {
+          isRefreshing = true;
           try {
             const newAccessToken = await refreshAccessToken();
             console.log('[SSE] 토큰 재발급 성공, 재연결 중');
@@ -63,7 +68,7 @@ export function useNotificationSse() {
             isRefreshing = false;
           }
         } else {
-          console.warn('[SSE] 일시적인 연결 오류로 연결 종료');
+          console.warn('[SSE] 일시적인 연결 오류 또는 리프레시 조건 불충족 – 연결 종료');
           es.close();
         }
       };
