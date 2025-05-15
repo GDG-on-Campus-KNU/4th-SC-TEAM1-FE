@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { BASE_URL } from '@shared/constants';
 import { useAuthStore } from '@shared/stores/authStore';
@@ -10,85 +10,99 @@ import { Notification } from '../apis';
 import { refreshAccessToken } from '../apis/auth';
 import { useNotificationStore } from '../stores';
 
-let isRefreshing = false;
-
 export function useNotificationSse() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-
   const addRef = useRef(useNotificationStore.getState().add);
-  const setAll = useNotificationStore.getState().setAll;
+  const setAllRef = useRef(useNotificationStore.getState().setAll);
 
+  // SSE 인스턴스
   const esRef = useRef<EventSourcePolyfill | null>(null);
+  // 재연결 대기(ms)
+  const reconnectDelay = useRef(1000);
+  // 컴포넌트 언마운트 여부
+  const isMounted = useRef(true);
 
-  useEffect(() => {
-    if (!isLoggedIn) return;
+  // SSE 연결 함수
+  const connectSse = useCallback(async (token: string) => {
+    // 기존 연결 닫기
+    esRef.current?.close();
 
-    const connectSse = (token: string) => {
-      if (esRef.current) {
-        esRef.current.close();
-      }
+    const es = new EventSourcePolyfill(`${BASE_URL}/api/v1/notifications/create`, {
+      headers: { Authorization: `Bearer ${token}` },
+      // withCredentials: true, // 쿠키 기반 인증일 때 필요
+    });
 
-      const es = new EventSourcePolyfill(`${BASE_URL}/notifications/create`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          skipAuthRefresh: 'true',
-        },
-      });
-
-      es.addEventListener('notification', (event) => {
-        try {
-          const data: Notification = JSON.parse((event as MessageEvent).data);
-          addRef.current(data);
-        } catch (e) {
-          console.error('[SSE] 알림 파싱 오류:', e);
-        }
-      });
-
-      es.onerror = async (e: Event) => {
-        console.error('[SSE] 연결 오류 발생', e);
-
-        const target = e.currentTarget as EventSourcePolyfill;
-
-        const errorData = e instanceof MessageEvent ? e.data : null;
-
-        if (
-          target?.readyState === EventSourcePolyfill.CLOSED &&
-          !isRefreshing &&
-          errorData === '유효하지 않은 토큰입니다.'
-        ) {
-          isRefreshing = true;
-          try {
-            const newAccessToken = await refreshAccessToken();
-            console.log('[SSE] 토큰 재발급 성공, 재연결 중');
-            connectSse(newAccessToken);
-          } catch {
-            console.error('[SSE] 토큰 재발급 실패, 로그아웃 처리');
-            resetOnCriticalError();
-          } finally {
-            isRefreshing = false;
-          }
-        } else {
-          console.warn('[SSE] 일시적인 연결 오류 또는 리프레시 조건 불충족 – 연결 종료');
-          es.close();
-        }
-      };
-
-      esRef.current = es;
+    // 연결 성공 시 backoff 초기화
+    es.onopen = () => {
+      reconnectDelay.current = 1000;
+      console.log('[SSE] 연결 성공');
     };
 
+    // 커스텀 이벤트 수신
+    es.addEventListener('notification', (ev) => {
+      try {
+        const data: Notification = JSON.parse((ev as MessageEvent).data);
+        addRef.current(data);
+      } catch (e) {
+        console.error('[SSE] 파싱 오류', e);
+      }
+    });
+
+    // 에러나 연결 종료 시
+    es.onerror = async () => {
+      console.warn(`[SSE] 연결 끊김, ${reconnectDelay.current}ms 후 재시도`);
+      es.close();
+
+      if (!isMounted.current) return;
+
+      // 토큰 만료 같은 치명적 오류는 먼저 재발급 시도
+      try {
+        const newToken = await refreshAccessToken();
+        accessToken.set(newToken);
+        // 재연결 (재발급 성공)
+        if (isMounted.current) {
+          await connectSse(newToken);
+        }
+      } catch {
+        console.error('[SSE] 토큰 재발급 실패, 로그아웃 처리');
+        resetOnCriticalError();
+        return;
+      }
+
+      // exponential backoff
+      const delay = reconnectDelay.current;
+      reconnectDelay.current = Math.min(delay * 2, 30000);
+
+      // backoff 이후 재연결
+      setTimeout(() => {
+        if (isMounted.current) {
+          const tokenNow = accessToken.get();
+          if (tokenNow) connectSse(tokenNow);
+        }
+      }, delay);
+    };
+
+    esRef.current = es;
+  }, []);
+
+  useEffect(() => {
+    isMounted.current = true;
     const token = accessToken.get();
-    if (token) {
+
+    if (isLoggedIn && token) {
       connectSse(token);
     }
 
     return () => {
+      isMounted.current = false;
       esRef.current?.close();
     };
-  }, [isLoggedIn]);
+  }, [isLoggedIn, connectSse]);
 
+  // 로그아웃 시 알림 초기화
   useEffect(() => {
     if (!isLoggedIn) {
-      setAll([]);
+      setAllRef.current([]);
     }
-  }, [isLoggedIn, setAll]);
+  }, [isLoggedIn]);
 }

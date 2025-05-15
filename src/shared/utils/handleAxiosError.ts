@@ -5,15 +5,20 @@ import axios from 'axios';
 import type { ErrorResponse } from '../types/apiTypes';
 
 export const handleAxiosError = (error: unknown): never => {
-  if (axios.isAxiosError(error) && error.response) {
-    const { status, data } = error.response as { status: number; data: ErrorResponse };
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status;
+    const data = error.response?.data as ErrorResponse | undefined;
 
     const message =
-      data.message || data.data?.message || '앗! 문제가 생겼어요. 다시 시도해 주세요.';
+      data?.message || data?.data?.message || error.message || '알 수 없는 오류가 발생했어요.';
 
     switch (status) {
       case 400:
         toast.error(message || '입력한 내용을 다시 한 번 확인해 주세요.');
+        throw new Error(message);
+
+      case 401:
+        toast.error(message || '인증 오류가 발생했어요.');
         throw new Error(message);
 
       case 404:
@@ -38,6 +43,15 @@ export const handleAxiosError = (error: unknown): never => {
     }
   }
 
-  toast.error('이외의 오류입니다. 개발자에게 문의해주세요');
-  throw new Error('네트워크 오류가 발생했습니다.');
+  const fallbackMessage =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'string'
+        ? error
+        : JSON.stringify(error);
+
+  toast.error(`예상치 못한 오류: ${fallbackMessage}`);
+  console.error('[handleAxiosError] 비정상 오류:', error);
+
+  throw new Error(fallbackMessage);
 };
