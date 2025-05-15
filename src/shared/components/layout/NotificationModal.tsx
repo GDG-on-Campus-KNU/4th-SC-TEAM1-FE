@@ -8,7 +8,7 @@ import { X } from 'lucide-react';
 import { Notification, ackNotification, fetchUncheckedNotifications } from '../../apis';
 import { useNotificationStore } from '../../stores';
 
-interface NotificationModalProps {
+type NotificationModalProps = {
   onClose: () => void;
 }
 

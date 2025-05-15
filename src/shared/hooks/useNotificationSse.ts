@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { BASE_URL } from '@shared/constants';
 import { useAuthStore } from '@shared/stores/authStore';
 import { accessToken } from '@shared/utils';
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import { Notification } from '../apis';
 import { useNotificationStore } from '../stores';
@@ -16,7 +17,12 @@ export function useNotificationSse() {
     const token = accessToken.get();
     if (!isLoggedIn) return;
 
-    const es = new EventSource(`${BASE_URL}/notifications/create?token=${token}`);
+    const es = new EventSourcePolyfill(`${BASE_URL}/notifications/create`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     es.onmessage = (ev) => {
       try {
         const data: Notification = JSON.parse(ev.data);
