@@ -42,6 +42,9 @@ export const handleAxiosError = (error: unknown): never => {
     }
   }
 
-  window.location.reload();
+  toast.error('네트워크 오류가 발생했습니다. 메인 페이지로 이동합니다.');
+  setTimeout(() => {
+    window.location.href = '/';
+  }, 700);
   throw new Error('네트워크 오류가 발생했습니다.');
 };
