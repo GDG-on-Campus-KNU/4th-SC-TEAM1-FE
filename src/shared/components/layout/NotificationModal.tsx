@@ -74,6 +74,8 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
         return `${n.senderUserId}님이 ${formatKoreanDate(n.diaryCreatedAt)}에 일기를 작성했어요.`;
       case 'comment':
         return `${n.senderUserId}님이 ${formatKoreanDate(n.diaryCreatedAt)}의 일기에 댓글을 작성했어요.`;
+      case 'friend':
+        return `${n.senderUserId}님이 친구 추가 요청을 보냈어요.`;
       default:
         return '새로운 알림이 도착했어요.';
     }
