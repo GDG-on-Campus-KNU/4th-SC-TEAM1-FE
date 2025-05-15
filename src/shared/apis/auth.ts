@@ -1,4 +1,7 @@
+import toast from 'react-hot-toast';
+
 import { resetOnCriticalError } from '@shared/utils';
+import axios from 'axios';
 
 import { axiosInstance } from '../lib/axiosInstance';
 import { useAuthStore } from '../stores/authStore';
@@ -73,6 +76,7 @@ export const checkUserId = async (userId: string): Promise<boolean> => {
 export const refreshAccessToken = async (): Promise<string> => {
   const refresh = refreshTokenUtil.get();
   const currentAccess = accessToken.get();
+
   if (!refresh || !currentAccess) {
     throw new Error('Access/Refresh Token이 없습니다. 다시 로그인해주세요.');
   }
@@ -85,7 +89,7 @@ export const refreshAccessToken = async (): Promise<string> => {
         refreshToken: refresh,
       },
       {
-        skipAuthRefresh: true,
+        skipAuthRefresh: true, // interceptor에서 리프레시 요청 무시
       },
     );
 
@@ -96,8 +100,22 @@ export const refreshAccessToken = async (): Promise<string> => {
 
     return newAccessToken;
   } catch (error) {
-    handleAxiosError(error);
+    if (axios.isAxiosError(error) && error.response) {
+      const message = error.response.data?.message;
+
+      if (message === '리프레시 토큰이 만료되었습니다.') {
+        resetOnCriticalError();
+        return '';
+      }
+
+      if (message) {
+        toast.error(message);
+        return '';
+      }
+    }
+
+    toast.error('토큰 재발급 중 알 수 없는 오류가 발생했습니다.');
     resetOnCriticalError();
-    throw error;
+    return '';
   }
 };

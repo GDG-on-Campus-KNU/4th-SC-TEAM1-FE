@@ -14,7 +14,7 @@ export const resetOnCriticalError = () => {
   useAuthStore.getState().logout();
   localStorage.clear();
   sessionStorage.clear();
-  toast.error('세션이 만료되어 메인 페이지로 이동합니다.');
+  toast.error('치명적인 오류로 메인 페이지로 이동합니다.');
 
   setTimeout(() => {
     window.location.href = '/';
