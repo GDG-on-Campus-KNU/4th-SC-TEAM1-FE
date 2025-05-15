@@ -86,13 +86,13 @@ axiosInstance.interceptors.response.use(
     const message = data.message ?? '';
 
     // 리프레시 토큰 관련 오류 → 강제 로그아웃
-    const forceLogoutMsgs = [
+    const forceLogoutKeywords = [
       '유효하지 않은 리프레시 토큰입니다.',
       '존재하지 않는 유저정보 입니다.',
       '리프레시 토큰이 만료되었습니다.',
     ];
-    if (status === 401 && forceLogoutMsgs.includes(message)) {
-      toast.error(message);
+    if (status === 401 && forceLogoutKeywords.some((keyword) => message.includes(keyword))) {
+      toast.error('세션이 유효하지 않습니다. 다시 로그인해주세요.');
       clearTokens();
       useAuthStore.getState().logout();
       window.location.href = '/';
