@@ -68,7 +68,7 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
           className="relative flex w-16 flex-col items-center focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <img src={sunIcon} alt="햇빛 주기" className="mx-auto h-8 w-8 sm:h-10 sm:w-10" />
-          <div className="absolute right-0 top-6 flex flex-col items-end space-y-0.5">
+          <div className="absolute right-0 top-7 flex flex-col items-end space-y-0.5">
             <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-red-500">
               -{stats.sun.cost}P
             </span>
@@ -76,7 +76,7 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
               +{stats.sun.exp}XP
             </span>
           </div>
-          <span className="mt-6 text-xs text-gray-700">햇빛</span>
+          <span className="mt-6 text-xs text-gray-700">햇빛 주기</span>
         </button>
 
         {/* 물 주기 */}
@@ -86,7 +86,7 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
           className="relative flex w-16 flex-col items-center focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <img src={waterIcon} alt="물 주기" className="mx-auto h-8 w-8 sm:h-10 sm:w-10" />
-          <div className="absolute right-0 top-6 flex flex-col items-end space-y-0.5">
+          <div className="absolute right-0 top-7 flex flex-col items-end space-y-0.5">
             <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-red-500">
               -{stats.water.cost}P
             </span>
@@ -94,7 +94,7 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
               +{stats.water.exp}XP
             </span>
           </div>
-          <span className="mt-6 text-xs text-gray-700">물</span>
+          <span className="mt-6 text-xs text-gray-700">물 주기</span>
         </button>
 
         {/* 영양분 주기 */}
@@ -104,7 +104,7 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
           className="relative flex w-16 flex-col items-center focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <img src={nutrientIcon} alt="영양분 주기" className="mx-auto h-8 w-8 sm:h-10 sm:w-10" />
-          <div className="absolute right-0 top-6 flex flex-col items-end space-y-0.5">
+          <div className="absolute right-0 top-7 flex flex-col items-end space-y-0.5">
             <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-red-500">
               -{stats.nutrient.cost}P
             </span>
@@ -112,7 +112,7 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
               +{stats.nutrient.exp}XP
             </span>
           </div>
-          <span className="mt-6 text-xs text-gray-700">영양분</span>
+          <span className="mt-6 text-xs text-gray-700">영양분 주기</span>
         </button>
       </div>
     </div>

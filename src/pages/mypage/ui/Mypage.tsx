@@ -1,35 +1,69 @@
-import { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 import { deleteAccount, logout as logoutAPI } from '@shared/apis';
-import { useAuthStore } from '@shared/stores/authStore';
+import { useAuthStore } from '@shared/stores';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { LogOut, Trash2, Upload } from 'lucide-react';
 
+import { MemberProfile, fetchMyProfile, updateMyNickname } from '../apis';
 import Background from '../assets/mypage-background.png';
 
-export const Mypage = () => {
+export const Mypage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { user } = useAuthStore();
-  const nickname = user?.nickname ?? '';
+  const navigate = useNavigate();
+  const { logout: clearAuth, updateNickname: setStoreNickname } = useAuthStore();
+  const queryClient = useQueryClient();
 
-  const [nicknameInput, setNicknameInput] = useState(nickname);
+  const {
+    data: me,
+    isLoading,
+    isError,
+  } = useQuery<MemberProfile, Error>({
+    queryKey: ['myProfile'],
+    queryFn: fetchMyProfile,
+    staleTime: 1000 * 60,
+  });
+
+  const [nicknameInput, setNicknameInput] = useState('');
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const navigate = useNavigate();
+  const isBusy = isLoggingOut || isDeleting;
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (me) {
+      setNicknameInput(me.nickname);
+      setProfilePreview(me.imageUrl);
+    }
+  }, [me]);
+
+  const { mutate: updateNickname, isPending: isUpdating } = useMutation<
+    void,
+    Error,
+    { nickname: string }
+  >({
+    mutationFn: ({ nickname }) => updateMyNickname(nickname),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myProfile'] });
+      setStoreNickname(nicknameInput);
+      toast.success('✨ 닉네임이 변경되었습니다!');
+    },
+  });
+
+  const onProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setProfilePreview(URL.createObjectURL(file));
     }
   };
 
-  const handleLogout = async () => {
+  const logoutUser = async () => {
     try {
       setIsLoggingOut(true);
       await logoutAPI();
+      clearAuth();
       toast.success('로그아웃 되었습니다.');
       navigate('/');
     } catch {
@@ -39,12 +73,12 @@ export const Mypage = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
+  const deleteUser = async () => {
     if (!confirm('정말 탈퇴하시겠어요? 이 작업은 되돌릴 수 없습니다.')) return;
-
     try {
       setIsDeleting(true);
       await deleteAccount();
+      clearAuth();
       toast.success('회원 탈퇴가 완료되었습니다.');
       navigate('/');
     } catch {
@@ -54,7 +88,32 @@ export const Mypage = () => {
     }
   };
 
-  const isBusy = isLoggingOut || isDeleting;
+  if (isLoading) {
+    return (
+      <div
+        className="flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat px-4 py-8"
+        style={{
+          backgroundImage: `url(${Background})`,
+          backgroundPosition: 'bottom center',
+        }}
+      >
+        <div className="animate-pulse text-lg font-semibold text-white/80">로딩 중…</div>
+      </div>
+    );
+  }
+  if (isError || !me) {
+    return (
+      <div
+        className="flex min-h-screen w-full items-center justify-center bg-cover bg-no-repeat px-4 py-8"
+        style={{
+          backgroundImage: `url(${Background})`,
+          backgroundPosition: 'bottom center',
+        }}
+      >
+        <span className="font-semibold text-red-500">프로필 정보를 불러오지 못했습니다.</span>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -71,15 +130,12 @@ export const Mypage = () => {
         <div className="mb-6 flex flex-col items-center gap-2">
           <div className="relative">
             <img
-              src={
-                profilePreview ??
-                `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(nickname)}`
-              }
+              src={profilePreview!}
               alt="프로필 이미지"
               className="h-24 w-24 rounded-full border border-gray-300 object-cover"
             />
             <button
-              className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-primary p-1.5 text-white hover:bg-primary/90"
+              className="absolute bottom-0 right-0 flex items-center justify-center rounded-full bg-primary p-1.5 text-white hover:bg-primary/90 disabled:opacity-50"
               onClick={() => fileInputRef.current?.click()}
               disabled={isBusy}
             >
@@ -89,11 +145,22 @@ export const Mypage = () => {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleProfileChange}
+              onChange={onProfileChange}
               className="hidden"
             />
           </div>
-          <span className="text-xs text-gray-500">업로드 버튼을 눌러 프로필 변경</span>
+          <span className="text-xs text-gray-500">업로드 버튼을 눌러 프로필 변경 (준비 중)</span>
+        </div>
+
+        {/* 사용자 계정 (읽기전용) */}
+        <div className="mb-4">
+          <label className="mb-1 block text-sm font-medium text-gray-700">사용자 계정</label>
+          <input
+            type="text"
+            value={me.userId}
+            readOnly
+            className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-sm text-gray-600"
+          />
         </div>
 
         {/* 닉네임 변경 */}
@@ -104,19 +171,20 @@ export const Mypage = () => {
               type="text"
               value={nicknameInput}
               onChange={(e) => setNicknameInput(e.target.value)}
-              disabled={isBusy}
+              disabled={isBusy || isUpdating}
               className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
             />
             <button
-              disabled={isBusy}
+              onClick={() => updateNickname({ nickname: nicknameInput })}
+              disabled={isBusy || isUpdating}
               className="rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              저장
+              {isUpdating ? '저장 중…' : '저장'}
             </button>
           </div>
         </div>
 
-        {/* 비밀번호 변경 */}
+        {/* 비밀번호 변경 (미구현) */}
         <div className="mb-6">
           <label className="mb-1 block text-sm font-medium text-gray-700">비밀번호 변경</label>
           <input
@@ -148,7 +216,7 @@ export const Mypage = () => {
         {/* 로그아웃 & 탈퇴 */}
         <div className="mt-4 flex flex-col gap-3">
           <button
-            onClick={handleLogout}
+            onClick={logoutUser}
             disabled={isBusy}
             className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -162,7 +230,7 @@ export const Mypage = () => {
             )}
           </button>
           <button
-            onClick={handleDeleteAccount}
+            onClick={deleteUser}
             disabled={isBusy}
             className="flex items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
