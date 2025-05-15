@@ -2,7 +2,7 @@
 
 # 2025 Google Developer Groups APAC Solution Challenge
 
-![image](https://github.com/user-attachments/assets/e411f617-407d-4b8b-ba77-b515f812b64d)
+![https://www.todak.site/](https://github.com/user-attachments/assets/e411f617-407d-4b8b-ba77-b515f812b64d)
 
 
 # AI-Powered Emotional Support Diary "Todak"
