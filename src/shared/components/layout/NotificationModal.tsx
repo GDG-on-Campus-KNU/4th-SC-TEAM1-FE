@@ -10,7 +10,7 @@ import { useNotificationStore } from '../../stores';
 
 type NotificationModalProps = {
   onClose: () => void;
-}
+};
 
 export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose }) => {
   const queryClient = useQueryClient();
@@ -62,11 +62,22 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  if (!document.getElementById('modal-root')) {
-    const div = document.createElement('div');
-    div.id = 'modal-root';
-    document.body.appendChild(div);
-  }
+  const formatKoreanDate = (isoString: string | null): string => {
+    if (!isoString) return '알 수 없는 날짜';
+    const date = new Date(isoString);
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+  };
+
+  const getMessage = (n: Notification): string => {
+    switch (n.type) {
+      case 'post':
+        return `${n.senderUserId}님이 ${formatKoreanDate(n.diaryCreatedAt)}에 일기를 작성했어요.`;
+      case 'comment':
+        return `${n.senderUserId}님이 ${formatKoreanDate(n.diaryCreatedAt)}의 일기에 댓글을 작성했어요.`;
+      default:
+        return '새로운 알림이 도착했어요.';
+    }
+  };
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -92,7 +103,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
               className="flex items-start justify-between rounded border border-gray-200 p-3"
             >
               <div className="flex-1">
-                <p className="text-sm text-gray-800">{n.type}</p>
+                <p className="text-sm text-gray-800">{getMessage(n)}</p>
                 <p className="mt-1 text-xs text-gray-500">
                   {new Date(n.createdAt).toLocaleString()}
                 </p>
