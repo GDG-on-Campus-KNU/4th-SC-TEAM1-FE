@@ -7,6 +7,11 @@ export interface MemberProfile {
   nickname: string;
   imageUrl: string;
 }
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+  newPasswordCheck: string;
+}
 
 export const fetchMyProfile = async (): Promise<MemberProfile> => {
   try {
@@ -21,6 +26,15 @@ export const fetchMyProfile = async (): Promise<MemberProfile> => {
 export const updateMyNickname = async (nickname: string): Promise<void> => {
   try {
     await axiosInstance.put('/members/edit', { nickname });
+  } catch (error) {
+    handleAxiosError(error);
+    throw error;
+  }
+};
+
+export const changePassword = async (payload: ChangePasswordPayload): Promise<void> => {
+  try {
+    await axiosInstance.put('/members/edit-password', payload);
   } catch (error) {
     handleAxiosError(error);
     throw error;

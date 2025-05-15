@@ -1,3 +1,4 @@
+// src/pages/Mypage.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -5,9 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import { deleteAccount, logout as logoutAPI } from '@shared/apis';
 import { useAuthStore } from '@shared/stores';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { LogOut, Trash2, Upload } from 'lucide-react';
+import { Eye, EyeOff, LogOut, Trash2, Upload } from 'lucide-react';
 
-import { MemberProfile, fetchMyProfile, updateMyNickname } from '../apis';
+import {
+  ChangePasswordPayload,
+  MemberProfile,
+  changePassword,
+  fetchMyProfile,
+  updateMyNickname,
+} from '../apis';
 import Background from '../assets/mypage-background.png';
 
 export const Mypage: React.FC = () => {
@@ -28,6 +35,14 @@ export const Mypage: React.FC = () => {
 
   const [nicknameInput, setNicknameInput] = useState('');
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
+
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordCheck, setNewPasswordCheck] = useState('');
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showCheck, setShowCheck] = useState(false);
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isBusy = isLoggingOut || isDeleting;
@@ -52,11 +67,23 @@ export const Mypage: React.FC = () => {
     },
   });
 
+  const { mutate: submitPasswordChange, isPending: isChangingPassword } = useMutation<
+    void,
+    Error,
+    ChangePasswordPayload
+  >({
+    mutationFn: (payload) => changePassword(payload),
+    onSuccess: () => {
+      toast.success('🔒 비밀번호가 성공적으로 변경되었습니다!');
+      setOldPassword('');
+      setNewPassword('');
+      setNewPasswordCheck('');
+    },
+  });
+
   const onProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setProfilePreview(URL.createObjectURL(file));
-    }
+    if (file) setProfilePreview(URL.createObjectURL(file));
   };
 
   const logoutUser = async () => {
@@ -184,32 +211,85 @@ export const Mypage: React.FC = () => {
           </div>
         </div>
 
-        {/* 비밀번호 변경 (미구현) */}
-        <div className="mb-6">
+        {/* 비밀번호 변경 */}
+        <div className="mb-6 space-y-3">
           <label className="mb-1 block text-sm font-medium text-gray-700">비밀번호 변경</label>
-          <input
-            type="password"
-            placeholder="현재 비밀번호"
-            disabled={isBusy}
-            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
-          />
-          <input
-            type="password"
-            placeholder="새 비밀번호"
-            disabled={isBusy}
-            className="mb-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
-          />
-          <input
-            type="password"
-            placeholder="새 비밀번호 확인"
-            disabled={isBusy}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
-          />
+
+          {/** 현재 비밀번호 */}
+          <div className="relative">
+            <input
+              type={showOld ? 'text' : 'password'}
+              placeholder="현재 비밀번호"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              disabled={isBusy || isChangingPassword}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
+            />
+            <button
+              type="button"
+              onClick={() => setShowOld((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showOld ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {/** 새 비밀번호 */}
+          <div className="relative">
+            <input
+              type={showNew ? 'text' : 'password'}
+              placeholder="새 비밀번호"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              disabled={isBusy || isChangingPassword}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNew((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {/** 새 비밀번호 확인 */}
+          <div className="relative">
+            <input
+              type={showCheck ? 'text' : 'password'}
+              placeholder="새 비밀번호 확인"
+              value={newPasswordCheck}
+              onChange={(e) => setNewPasswordCheck(e.target.value)}
+              disabled={isBusy || isChangingPassword}
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-primary focus:outline-none disabled:bg-gray-100"
+            />
+            <button
+              type="button"
+              onClick={() => setShowCheck((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showCheck ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+
           <button
-            disabled={isBusy}
+            onClick={() =>
+              submitPasswordChange({
+                oldPassword,
+                newPassword,
+                newPasswordCheck,
+              })
+            }
+            disabled={
+              isBusy ||
+              isChangingPassword ||
+              newPassword !== newPasswordCheck ||
+              !oldPassword ||
+              !newPassword
+            }
             className="mt-2 w-full rounded-lg bg-primary px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            비밀번호 변경
+            {isChangingPassword ? '변경 중…' : '비밀번호 변경'}
           </button>
         </div>
 
