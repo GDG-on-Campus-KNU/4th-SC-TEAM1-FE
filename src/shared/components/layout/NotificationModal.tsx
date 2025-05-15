@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import toast from 'react-hot-toast';
 
@@ -15,6 +15,7 @@ interface NotificationModalProps {
 export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose }) => {
   const queryClient = useQueryClient();
   const { list, setAll, remove } = useNotificationStore();
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const { data, isLoading, isError } = useQuery<Notification[], Error>({
     queryKey: ['notifications', 'unchecked'],
@@ -27,12 +28,22 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
     }
   }, [data, setAll]);
 
-  const { mutate: ackMutate, isPending: isAcking } = useMutation<void, Error, string>({
-    mutationFn: (notificationId: string) => ackNotification(notificationId),
+  const { mutate: ackMutate } = useMutation<void, Error, string>({
+    mutationFn: (notificationId: string) => {
+      setDeletingIds((prev) => new Set(prev).add(notificationId));
+      return ackNotification(notificationId);
+    },
     onSuccess: (_data, notificationId) => {
       remove(notificationId);
       toast.success('알림이 제거되었어요');
       queryClient.invalidateQueries({ queryKey: ['notifications', 'unchecked'] });
+    },
+    onSettled: (_data, _error, notificationId) => {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(notificationId);
+        return newSet;
+      });
     },
   });
 
@@ -59,7 +70,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+      <div className="max-h-[calc(100vh-200px)] w-11/12 max-w-xs overflow-y-auto rounded-lg bg-white p-6 shadow-lg sm:max-w-md">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">알림</h3>
           <button onClick={onClose}>
@@ -88,7 +99,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ onClose })
               </div>
               <button
                 onClick={() => ackMutate(n.id)}
-                disabled={isAcking}
+                disabled={deletingIds.has(n.id)}
                 className="ml-4 rounded bg-red-100 px-3 py-1 text-xs text-red-600 hover:bg-red-200 disabled:opacity-50"
               >
                 지우기
