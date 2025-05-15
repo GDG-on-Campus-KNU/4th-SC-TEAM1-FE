@@ -38,7 +38,9 @@ export const FriendsForestPage = () => {
     counts.find((c) => c.friendStatus === 'PENDING' && c.info === 'Requester')?.count || 0;
   const sentPendingCount =
     counts.find((c) => c.friendStatus === 'PENDING' && c.info === 'Accepter')?.count || 0;
-  const friendCount = counts.find((c) => c.friendStatus === 'ACCEPTED')?.count || friends.length;
+  const friendCount =
+    (Array.isArray(counts) && counts.find((c) => c.friendStatus === 'ACCEPTED')?.count) ||
+    (friends?.length ?? 0);
 
   const deleteMutation = useMutation<
     void,
