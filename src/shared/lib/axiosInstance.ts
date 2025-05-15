@@ -37,38 +37,38 @@ axiosInstance.interceptors.response.use(
 
     const status = error.response?.status;
     const message: string | undefined = error.response?.data?.message;
+    const forceLogoutMessages = [
+      '유효하지 않은 리프레시 토큰입니다.',
+      '존재하지 않는 유저정보 입니다.',
+      '리프레시 토큰이 만료되었습니다.',
+    ];
 
-    // ✅ 조건: 401 에러면서 리프레시 시도 안 한 요청
-    if (status === 401 && !originalRequest._retry && !originalRequest.skipAuthRefresh) {
-      // ✅ 메시지 기반 분기 처리
-      if (message === '유효하지 않은 토큰입니다.') {
-        originalRequest._retry = true;
-
-        try {
-          const newAccessToken = await refreshAccessToken();
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newAccessToken}`,
-          };
-
-          return axiosInstance(originalRequest); // 요청 재시도
-        } catch (refreshError) {
-          // refresh 자체 실패 시 (예: 네트워크 에러)
-          return Promise.reject(refreshError);
-        }
-      }
-
-      if (message === '리프레시 토큰이 만료되었습니다.') {
-        toast.error(message);
-        clearTokens();
-        useAuthStore.getState().logout();
-        window.location.href = '/';
-        return Promise.reject(new Error(message));
-      }
-
-      // 기타 401 에러
-      toast.error(message || '인증 오류가 발생했습니다.');
+    if (status === 401 && message && forceLogoutMessages.includes(message)) {
+      toast.error(message || '인증 정보가 만료되었습니다.');
+      clearTokens();
+      useAuthStore.getState().logout();
+      window.location.href = '/';
       return Promise.reject(new Error(message));
+    }
+
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.skipAuthRefresh &&
+      message === '유효하지 않은 토큰입니다.'
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const newAccessToken = await refreshAccessToken();
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${newAccessToken}`,
+        };
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        return Promise.reject(refreshError);
+      }
     }
 
     return Promise.reject(error);
