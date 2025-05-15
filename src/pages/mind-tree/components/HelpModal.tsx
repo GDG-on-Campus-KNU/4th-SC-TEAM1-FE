@@ -33,8 +33,8 @@ export const HelpModal = ({ isOpen, onClose }: HelpModalProps) => {
 
           <p>
             <span className="font-semibold text-primary">출석</span>과{' '}
-            <span className="font-semibold text-primary">일기 및 댓글 작성</span>을 통해 포인트를
-            모을 수 있어요.
+            <span className="font-semibold text-primary">일기 및 댓글 작성</span>을 통해 하루 한 번
+            포인트를 모을 수 있어요.
           </p>
 
           <p>🌿포인트로 다음 활동을 할 수 있어요:</p>
