@@ -42,6 +42,6 @@ export const handleAxiosError = (error: unknown): never => {
     }
   }
 
-  window.location.reload();
+  toast.error('이외의 오류입니다. 개발자에게 문의해주세요');
   throw new Error('네트워크 오류가 발생했습니다.');
 };

@@ -41,7 +41,12 @@ axiosInstance.interceptors.response.use(
 
       try {
         const newAccessToken = await refreshAccessToken();
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${newAccessToken}`,
+        };
+
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         clearTokens();

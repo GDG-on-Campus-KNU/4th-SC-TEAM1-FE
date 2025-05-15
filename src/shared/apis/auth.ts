@@ -80,9 +80,9 @@ export const refreshAccessToken = async (): Promise<string> => {
 
   try {
     const response = await axiosInstance.post(
-      '/auth/reissue', // 1) 엔드포인트를 /auth/reissue로 변경
+      '/auth/reissue',
       {
-        accessToken: currentAccess, // 3) 기존 액세스 토큰 함께 전송
+        accessToken: currentAccess,
         refreshToken: refresh,
       },
       {

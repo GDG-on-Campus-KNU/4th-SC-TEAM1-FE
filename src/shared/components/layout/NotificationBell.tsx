@@ -7,8 +7,7 @@ import { NotificationModal } from './NotificationModal';
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
-  const list = useNotificationStore((s) => s.list);
-  const count = list.length;
+  const count = useNotificationStore((s) => s.count);
 
   return (
     <>

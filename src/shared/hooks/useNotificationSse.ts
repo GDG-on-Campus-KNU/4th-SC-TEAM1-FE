@@ -1,45 +1,87 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { BASE_URL } from '@shared/constants';
 import { useAuthStore } from '@shared/stores/authStore';
-import { accessToken } from '@shared/utils';
+import { accessToken, clearTokens } from '@shared/utils';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 
 import { Notification } from '../apis';
+import { refreshAccessToken } from '../apis/auth';
 import { useNotificationStore } from '../stores';
+
+let isRefreshing = false;
 
 export function useNotificationSse() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const add = useNotificationStore((s) => s.add);
-  const setAll = useNotificationStore((s) => s.setAll);
+  const logout = useAuthStore.getState().logout;
+
+  const add = useNotificationStore.getState().add;
+  const setAll = useNotificationStore.getState().setAll;
+
+  const esRef = useRef<EventSourcePolyfill | null>(null);
 
   useEffect(() => {
-    const token = accessToken.get();
     if (!isLoggedIn) return;
 
-    const es = new EventSourcePolyfill(`${BASE_URL}/notifications/create`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    es.onmessage = (ev) => {
-      try {
-        const data: Notification = JSON.parse(ev.data);
-        add(data);
-      } catch {
-        console.error('[SSE] parsing error');
+    const connectSse = (token: string) => {
+      if (esRef.current) {
+        esRef.current.close();
       }
+
+      const es = new EventSourcePolyfill(`${BASE_URL}/notifications/create`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          skipAuthRefresh: 'true',
+        },
+      });
+
+      es.addEventListener('notification', (event) => {
+        try {
+          const data: Notification = JSON.parse((event as MessageEvent).data);
+          add({ ...data });
+        } catch (e) {
+          console.error('[SSE] 알림 파싱 오류:', e);
+        }
+      });
+
+      es.onerror = async (e: Event) => {
+        console.error('[SSE] 연결 오류 발생');
+
+        const target = e.currentTarget as EventSourcePolyfill;
+
+        if (target?.readyState === EventSourcePolyfill.CLOSED && !isRefreshing) {
+          isRefreshing = true;
+
+          try {
+            const newAccessToken = await refreshAccessToken();
+            console.log('[SSE] 토큰 재발급 성공, 재연결 중');
+            connectSse(newAccessToken);
+          } catch {
+            console.error('[SSE] 토큰 재발급 실패, 로그아웃 처리');
+            clearTokens();
+            logout();
+            window.location.href = '/';
+          } finally {
+            isRefreshing = false;
+          }
+        } else {
+          console.warn('[SSE] 일시적인 연결 오류로 연결 종료');
+          es.close();
+        }
+      };
+
+      esRef.current = es;
     };
-    es.onerror = () => {
-      console.error('[SSE] connection error');
-      es.close();
-    };
+
+    const token = accessToken.get();
+    if (token) {
+      connectSse(token);
+    }
 
     return () => {
-      es.close();
+      esRef.current?.close();
     };
-  }, [isLoggedIn, add]);
+  }, [isLoggedIn, logout, add]);
 
   useEffect(() => {
     if (!isLoggedIn) {
