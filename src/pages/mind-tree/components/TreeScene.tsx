@@ -61,24 +61,6 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
 
       {/* Care 버튼들 */}
       <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-4 rounded-xl bg-white/80 p-2 shadow-md backdrop-blur-md sm:bottom-6 md:bottom-10">
-        {/* 햇빛 주기 */}
-        <button
-          onClick={onSunClick}
-          disabled={disabled}
-          className="relative flex w-16 flex-col items-center focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <img src={sunIcon} alt="햇빛 주기" className="mx-auto h-8 w-8 sm:h-10 sm:w-10" />
-          <div className="absolute right-0 top-7 flex flex-col items-end space-y-0.5">
-            <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-red-500">
-              -{stats.sun.cost}P
-            </span>
-            <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-green-500">
-              +{stats.sun.exp}XP
-            </span>
-          </div>
-          <span className="mt-6 text-xs text-gray-700">햇빛 주기</span>
-        </button>
-
         {/* 물 주기 */}
         <button
           onClick={onWaterClick}
@@ -96,7 +78,23 @@ export const TreeScene: React.FC<TreeSceneProps> = ({
           </div>
           <span className="mt-6 text-xs text-gray-700">물 주기</span>
         </button>
-
+        {/* 햇빛 주기 */}
+        <button
+          onClick={onSunClick}
+          disabled={disabled}
+          className="relative flex w-16 flex-col items-center focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <img src={sunIcon} alt="햇빛 주기" className="mx-auto h-8 w-8 sm:h-10 sm:w-10" />
+          <div className="absolute right-0 top-7 flex flex-col items-end space-y-0.5">
+            <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-red-500">
+              -{stats.sun.cost}P
+            </span>
+            <span className="rounded bg-white/80 px-1 text-[10px] font-semibold text-green-500">
+              +{stats.sun.exp}XP
+            </span>
+          </div>
+          <span className="mt-6 text-xs text-gray-700">햇빛 주기</span>
+        </button>
         {/* 영양분 주기 */}
         <button
           onClick={onNutrientClick}
