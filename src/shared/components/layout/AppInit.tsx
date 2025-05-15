@@ -3,9 +3,15 @@ import { useEffect } from 'react';
 import { refreshAccessToken } from '@shared/apis';
 import { useAuthStore } from '@shared/stores/authStore';
 import { clearTokens, refreshToken } from '@shared/utils/token';
+import { useQuery } from '@tanstack/react-query';
+
+import { fetchUncheckedNotifications } from '../../apis';
+import { useNotificationStore } from '../../stores';
 
 export const AppInit = () => {
   const { login, logout } = useAuthStore();
+  const setAll = useNotificationStore((s) => s.setAll);
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
   useEffect(() => {
     const tryRestoreLogin = async () => {
@@ -14,7 +20,6 @@ export const AppInit = () => {
 
       try {
         await refreshAccessToken();
-        // console.log('AccessToken 재발급 성공:', newAccessToken); // 필요 없다면 제거
       } catch {
         clearTokens();
         logout();
@@ -24,6 +29,18 @@ export const AppInit = () => {
 
     tryRestoreLogin();
   }, [login, logout]);
+
+  const { data } = useQuery({
+    queryKey: ['notifications', 'unchecked'],
+    queryFn: fetchUncheckedNotifications,
+    enabled: isLoggedIn,
+  });
+
+  useEffect(() => {
+    if (data) {
+      setAll(data);
+    }
+  }, [data, setAll]);
 
   return null;
 };

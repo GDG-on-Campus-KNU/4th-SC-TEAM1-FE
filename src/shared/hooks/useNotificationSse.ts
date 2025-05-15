@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import { BASE_URL } from '@shared/constants';
 import { useAuthStore } from '@shared/stores/authStore';
+import { accessToken } from '@shared/utils';
 
 import { Notification } from '../apis';
 import { useNotificationStore } from '../stores';
@@ -12,9 +13,10 @@ export function useNotificationSse() {
   const setAll = useNotificationStore((s) => s.setAll);
 
   useEffect(() => {
+    const token = accessToken.get();
     if (!isLoggedIn) return;
 
-    const es = new EventSource(`${BASE_URL}/notifications/create`);
+    const es = new EventSource(`${BASE_URL}/notifications/create?token=${token}`);
     es.onmessage = (ev) => {
       try {
         const data: Notification = JSON.parse(ev.data);
