@@ -1,4 +1,3 @@
-// src/apis/membersApi.ts
 import { axiosInstance } from '@shared/lib';
 import { handleAxiosError } from '@shared/utils';
 
